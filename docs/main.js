@@ -266,7 +266,7 @@ function generateOutfit(pools, rng) {
 function layoutSquares(W, H, includeJacket) {
   // Uniform square cells so visuals look consistent; add a bit more breathing room
   const GAP_Y = 14 * DPR;
-  const GAP_X = 16 * DPR;
+  const GAP_X = 80 * DPR;
   const rows = includeJacket ? 4 : 3;
   const maxCols = 2; // top row has two cells
 
