@@ -100,16 +100,9 @@ async function loadManifest() {
     console.log('Firebase not configured or error loading user data:', error.message);
   }
   
-  // Fallback to static manifest.json
-  try {
-    const res = await fetch('manifest.json');
-    const data = await res.json();
-    state.manifest = data;
-    console.log('Loaded static manifest');
-  } catch (error) {
-    console.error('Error loading manifest:', error);
-    state.manifest = [];
-  }
+  // No items found - prompt user to create their closet
+  console.log('No closet found - user needs to upload items');
+  state.manifest = [];
   
   try {
     state.lastSelected = JSON.parse(localStorage.getItem('lastSelected') || 'null');
@@ -651,6 +644,42 @@ function draw(sel, canvas) {
 }
 
 async function regenerate(kind) {
+  // Check if there are any items
+  if (!state.manifest || state.manifest.length === 0) {
+    console.log('No items in closet - showing empty state');
+    const emptyState = document.getElementById('empty-state');
+    const canvas = document.getElementById('c');
+    
+    // Check if we're viewing someone else's closet
+    const urlParams = new URLSearchParams(window.location.search);
+    const viewingUsername = urlParams.get('user');
+    
+    if (emptyState) {
+      if (viewingUsername) {
+        emptyState.innerHTML = `
+          <h2>${viewingUsername}'s Closet is Empty</h2>
+          <p>This user hasn't uploaded any clothes yet.</p>
+          <a href="index.html">Go to My Closet</a>
+        `;
+      } else {
+        emptyState.innerHTML = `
+          <h2>Your Closet is Empty</h2>
+          <p>Upload your clothes to start generating personalized outfits!</p>
+          <a href="upload.html">Upload Your First Item</a>
+        `;
+      }
+      emptyState.classList.remove('hidden');
+    }
+    if (canvas) canvas.style.display = 'none';
+    return;
+  }
+  
+  // Hide empty state if visible
+  const emptyState = document.getElementById('empty-state');
+  const canvas = document.getElementById('c');
+  if (emptyState) emptyState.classList.add('hidden');
+  if (canvas) canvas.style.display = 'block';
+  
   // Deterministic seed per action
   state.seed = (state.seed + (kind === 'remix' ? 1 : 17)) >>> 0;
   const rng = mulberry32(state.seed);
