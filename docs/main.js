@@ -780,65 +780,124 @@ function hookup() {
     tempCanvas.height = targetHeight;
     
     const ctx = tempCanvas.getContext('2d');
-    ctx.fillStyle = '#fff';
+    // Light beige background for editorial look
+    ctx.fillStyle = '#f8f8f6';
     ctx.fillRect(0, 0, targetWidth, targetHeight);
     
-    const cells = layoutSquares(targetWidth, targetHeight, !!sel.outerwear);
-    const S = cells[0]?.s || 100;
+    // Calculate base size for items
+    const baseSize = Math.min(targetWidth, targetHeight) * 0.35;
+    const padding = 60;
     
-    // Draw outfit items
-    for (const c of cells) {
-      const img = sel.images[c.category] || (c.category === 'top_base' ? sel.images.top_base : 
-                   c.category === 'top_overshirt' ? sel.images.top_overshirt : null);
-      if (!img) continue;
-      const iw = img.naturalWidth;
-      const ih = img.naturalHeight;
-      const scale = Math.min(c.s / iw, c.s / ih);
-      const dw = Math.floor(iw * scale);
-      const dh = Math.floor(ih * scale);
-      const dx = Math.floor(c.x + (c.s - dw) / 2);
-      const dy = Math.floor(c.y + (c.s - dh) / 2);
-      ctx.drawImage(img, dx, dy, dw, dh);
+    // Define flat-lay positions for each item category
+    const positions = [];
+    
+    // Jacket (if present) - top left, larger
+    if (sel.outerwear) {
+      positions.push({
+        img: sel.images.jacket,
+        x: padding + baseSize * 0.1,
+        y: padding,
+        scale: 1.3
+      });
     }
     
-    // Draw EDC items if enabled - IN A SQUARE IN BOTTOM RIGHT CORNER
+    // Top overshirt/midlayer - center-left, slightly overlapping
+    if (sel.images.top_overshirt) {
+      positions.push({
+        img: sel.images.top_overshirt,
+        x: sel.outerwear ? padding + baseSize * 0.8 : padding + baseSize * 0.3,
+        y: sel.outerwear ? padding + baseSize * 0.4 : padding + baseSize * 0.2,
+        scale: 1.1
+      });
+    }
+    
+    // Base tee - center, slightly lower
+    if (sel.images.top_base) {
+      positions.push({
+        img: sel.images.top_base,
+        x: targetWidth / 2 - baseSize * 0.4,
+        y: sel.images.top_overshirt ? padding + baseSize * 0.6 : padding + baseSize * 0.4,
+        scale: 0.9
+      });
+    }
+    
+    // Pants - center-bottom, partially overlapping top
+    if (sel.images.pants) {
+      positions.push({
+        img: sel.images.pants,
+        x: targetWidth / 2 - baseSize * 0.5,
+        y: targetHeight - baseSize * 1.6 - padding,
+        scale: 1.2
+      });
+    }
+    
+    // Shoes - bottom right
+    if (sel.images.shoes) {
+      positions.push({
+        img: sel.images.shoes,
+        x: targetWidth - baseSize - padding,
+        y: targetHeight - baseSize * 0.8 - padding,
+        scale: 0.85
+      });
+    }
+    
+    // Draw all clothing items
+    for (const pos of positions) {
+      if (!pos.img) continue;
+      
+      const iw = pos.img.naturalWidth;
+      const ih = pos.img.naturalHeight;
+      const targetSize = baseSize * pos.scale;
+      const scale = Math.min(targetSize / iw, targetSize / ih);
+      const dw = Math.floor(iw * scale);
+      const dh = Math.floor(ih * scale);
+      
+      ctx.save();
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.08)';
+      ctx.shadowBlur = 15;
+      ctx.shadowOffsetX = 5;
+      ctx.shadowOffsetY = 5;
+      ctx.drawImage(pos.img, Math.floor(pos.x), Math.floor(pos.y), dw, dh);
+      ctx.restore();
+    }
+    
+    // Draw EDC items in top-right corner
     if (state.includeEDC && sel.edcImages && sel.edcImages.length > 0) {
-      const edcSquareSize = Math.floor(S * 0.85);
+      const edcSize = baseSize * 0.25;
+      const edcStartX = targetWidth - edcSize * 1.8 - padding;
+      const edcStartY = padding + 20;
+      const edcSpacing = edcSize * 0.25;
       
-      const edcSquareX = targetWidth - edcSquareSize - 20;
-      const edcSquareY = targetHeight - edcSquareSize - 20;
-      
-      const padding = 8;
-      const availableSize = edcSquareSize - padding * 2;
-      const itemSize = Math.floor(availableSize / 2.5);
-      const spacing = 6;
-      
-      let offsetX = 0;
-      let offsetY = 0;
+      let edcX = 0;
+      let edcY = 0;
       
       for (const { img, item } of sel.edcImages) {
         if (item.position === 'bag-item') continue;
         
         const iw = img.naturalWidth;
         const ih = img.naturalHeight;
-        const scale = Math.min(itemSize / iw, itemSize / ih);
+        const scale = Math.min(edcSize / iw, edcSize / ih);
         const dw = Math.floor(iw * scale);
         const dh = Math.floor(ih * scale);
         
-        if (offsetX + dw > availableSize) {
-          offsetX = 0;
-          offsetY += itemSize + spacing;
+        // Wrap to next row if needed
+        if (edcX > 0 && edcX + dw > edcSize * 2) {
+          edcX = 0;
+          edcY += edcSize + edcSpacing;
         }
         
-        const edcX = edcSquareX + padding + offsetX + Math.floor((itemSize - dw) / 2);
-        const edcY = edcSquareY + padding + offsetY + Math.floor((itemSize - dh) / 2);
+        const finalX = edcStartX + edcX;
+        const finalY = edcStartY + edcY;
         
         ctx.save();
-        ctx.globalAlpha = 0.95;
-        ctx.drawImage(img, edcX, edcY, dw, dh);
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.06)';
+        ctx.shadowBlur = 8;
+        ctx.shadowOffsetX = 2;
+        ctx.shadowOffsetY = 2;
+        ctx.drawImage(img, Math.floor(finalX), Math.floor(finalY), dw, dh);
         ctx.restore();
         
-        offsetX += itemSize + spacing;
+        edcX += dw + edcSpacing;
       }
     }
     
