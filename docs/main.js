@@ -458,19 +458,27 @@ function draw(sel, canvas) {
     state.arrowHitboxes.push({rect: {x: Math.floor(rightX - hitWR / 2), y: Math.floor(midY - hitH / 2), w: hitWR, h: hitH}, category: c.category, dir: +1});
   }
   
-  // Draw EDC items if enabled - BIGGER AND IN BOTTOM RIGHT CORNER
+  // Draw EDC items if enabled - IN A SQUARE IN BOTTOM RIGHT CORNER
   if (state.includeEDC && sel.edcImages && sel.edcImages.length > 0) {
     console.log('Drawing EDC items:', sel.edcImages.length);
     const S = cells.length > 0 ? cells[0].s : 100;
-    const edcSize = Math.floor(S * 0.5); // Make EDC items bigger (was 0.35)
+    const edcSquareSize = Math.floor(S * 0.85); // EDC square size
     
-    // Position all EDC items in bottom right corner as a grid
-    const startX = Math.floor(W * 0.75);
-    const startY = Math.floor(H * 0.7);
-    const spacing = 10 * DPR;
+    // Position EDC square in bottom right corner
+    const edcSquareX = W - edcSquareSize - 20 * DPR;
+    const edcSquareY = H - edcSquareSize - 20 * DPR;
+    
+    // Store EDC square position for click detection
+    state.edcSquare = { x: edcSquareX, y: edcSquareY, s: edcSquareSize };
+    
+    // Layout EDC items within the square as a grid
+    const padding = 8 * DPR;
+    const availableSize = edcSquareSize - padding * 2;
+    const itemSize = Math.floor(availableSize / 2.5); // Fit 2-3 items per row
+    const spacing = 6 * DPR;
+    
     let offsetX = 0;
     let offsetY = 0;
-    let maxHeightInRow = 0;
     
     for (const { img, item } of sel.edcImages) {
       // Skip bag-item (they're inside bags)
@@ -478,29 +486,54 @@ function draw(sel, canvas) {
       
       const iw = img.naturalWidth;
       const ih = img.naturalHeight;
-      const scale = Math.min(edcSize / iw, edcSize / ih);
+      const scale = Math.min(itemSize / iw, itemSize / ih);
       const dw = Math.floor(iw * scale);
       const dh = Math.floor(ih * scale);
       
-      // If item would go off screen, move to next row
-      if (startX + offsetX + dw > W - 20 * DPR) {
+      // If item would go beyond square width, move to next row
+      if (offsetX + dw > availableSize) {
         offsetX = 0;
-        offsetY += maxHeightInRow + spacing;
-        maxHeightInRow = 0;
+        offsetY += itemSize + spacing;
       }
       
-      const edcX = startX + offsetX;
-      const edcY = startY + offsetY;
+      const edcX = edcSquareX + padding + offsetX + Math.floor((itemSize - dw) / 2);
+      const edcY = edcSquareY + padding + offsetY + Math.floor((itemSize - dh) / 2);
       
       // Draw with full opacity
       ctx.save();
-      ctx.globalAlpha = 0.9;
+      ctx.globalAlpha = 0.95;
       ctx.drawImage(img, edcX, edcY, dw, dh);
       ctx.restore();
       
-      offsetX += dw + spacing;
-      maxHeightInRow = Math.max(maxHeightInRow, dh);
+      offsetX += itemSize + spacing;
     }
+    
+    // Draw arrows for EDC swapping (similar to outfit items)
+    const midY = Math.floor(edcSquareY + edcSquareSize / 2);
+    const padSide = Math.max(8 * DPR, Math.round(edcSquareSize * 0.08));
+    const fontPx = Math.max(8 * DPR, Math.round(edcSquareSize * 0.04));
+    ctx.save();
+    ctx.font = `${fontPx}px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace`;
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#000';
+    ctx.globalAlpha = 0.35;
+    const leftText = '<';
+    const rightText = '>';
+    const leftW = Math.ceil(ctx.measureText(leftText).width);
+    const rightW = Math.ceil(ctx.measureText(rightText).width);
+    let leftX = edcSquareX - padSide - Math.ceil(leftW / 2);
+    let rightX = edcSquareX + edcSquareSize + padSide + Math.ceil(rightW / 2);
+    leftX = Math.max(leftW / 2, leftX);
+    rightX = Math.min(W - rightW / 2, rightX);
+    ctx.fillText(leftText, leftX, midY);
+    ctx.fillText(rightText, rightX, midY);
+    ctx.restore();
+    const hitH = Math.ceil(fontPx * 3);
+    const hitWL = Math.max(leftW * 3, fontPx * 3);
+    const hitWR = Math.max(rightW * 3, fontPx * 3);
+    state.arrowHitboxes.push({rect: {x: Math.floor(leftX - hitWL / 2), y: Math.floor(midY - hitH / 2), w: hitWL, h: hitH}, category: 'edc', dir: -1});
+    state.arrowHitboxes.push({rect: {x: Math.floor(rightX - hitWR / 2), y: Math.floor(midY - hitH / 2), w: hitWR, h: hitH}, category: 'edc', dir: +1});
   }
   
   ctx.restore();
@@ -625,42 +658,44 @@ function hookup() {
       ctx.drawImage(img, dx, dy, dw, dh);
     }
     
-    // Draw EDC items if enabled - BIGGER AND IN BOTTOM RIGHT CORNER
+    // Draw EDC items if enabled - IN A SQUARE IN BOTTOM RIGHT CORNER
     if (state.includeEDC && sel.edcImages && sel.edcImages.length > 0) {
-      const edcSize = Math.floor(S * 0.5);
+      const edcSquareSize = Math.floor(S * 0.85);
       
-      const startX = Math.floor(targetWidth * 0.75);
-      const startY = Math.floor(targetHeight * 0.7);
-      const spacing = 10;
+      const edcSquareX = targetWidth - edcSquareSize - 20;
+      const edcSquareY = targetHeight - edcSquareSize - 20;
+      
+      const padding = 8;
+      const availableSize = edcSquareSize - padding * 2;
+      const itemSize = Math.floor(availableSize / 2.5);
+      const spacing = 6;
+      
       let offsetX = 0;
       let offsetY = 0;
-      let maxHeightInRow = 0;
       
       for (const { img, item } of sel.edcImages) {
         if (item.position === 'bag-item') continue;
         
         const iw = img.naturalWidth;
         const ih = img.naturalHeight;
-        const scale = Math.min(edcSize / iw, edcSize / ih);
+        const scale = Math.min(itemSize / iw, itemSize / ih);
         const dw = Math.floor(iw * scale);
         const dh = Math.floor(ih * scale);
         
-        if (startX + offsetX + dw > targetWidth - 20) {
+        if (offsetX + dw > availableSize) {
           offsetX = 0;
-          offsetY += maxHeightInRow + spacing;
-          maxHeightInRow = 0;
+          offsetY += itemSize + spacing;
         }
         
-        const edcX = startX + offsetX;
-        const edcY = startY + offsetY;
+        const edcX = edcSquareX + padding + offsetX + Math.floor((itemSize - dw) / 2);
+        const edcY = edcSquareY + padding + offsetY + Math.floor((itemSize - dh) / 2);
         
         ctx.save();
-        ctx.globalAlpha = 0.9;
+        ctx.globalAlpha = 0.95;
         ctx.drawImage(img, edcX, edcY, dw, dh);
         ctx.restore();
         
-        offsetX += dw + spacing;
-        maxHeightInRow = Math.max(maxHeightInRow, dh);
+        offsetX += itemSize + spacing;
       }
     }
     
@@ -719,16 +754,30 @@ function hookup() {
     const x = Math.floor((e.clientX - rect.left) * DPR);
     const y = Math.floor((e.clientY - rect.top) * DPR);
     
-    // On mobile, check if click is on left or right half of an item cell
+    // On mobile, check if click is on left or right half of an item cell or EDC square
     const isMobile = window.innerWidth <= 768;
-    if (isMobile && state.lastCells) {
-      for (const c of state.lastCells) {
-        // Check if click is within cell bounds
-        if (x >= c.x && x <= c.x + c.s && y >= c.y && y <= c.y + c.s) {
-          const cellCenterX = c.x + c.s / 2;
-          const dir = x < cellCenterX ? -1 : 1;
-          await cycleCategory(c.category, dir);
+    if (isMobile) {
+      // Check EDC square first
+      if (state.edcSquare && state.includeEDC) {
+        const edc = state.edcSquare;
+        if (x >= edc.x && x <= edc.x + edc.s && y >= edc.y && y <= edc.y + edc.s) {
+          const centerX = edc.x + edc.s / 2;
+          const dir = x < centerX ? -1 : 1;
+          await cycleCategory('edc', dir);
           return;
+        }
+      }
+      
+      // Check outfit cells
+      if (state.lastCells) {
+        for (const c of state.lastCells) {
+          // Check if click is within cell bounds
+          if (x >= c.x && x <= c.x + c.s && y >= c.y && y <= c.y + c.s) {
+            const cellCenterX = c.x + c.s / 2;
+            const dir = x < cellCenterX ? -1 : 1;
+            await cycleCategory(c.category, dir);
+            return;
+          }
         }
       }
     }
@@ -747,13 +796,6 @@ function hookup() {
   await loadEDCPairings();
   hookup();
   await regenerate('create');
-  
-  // Hide loading screen
-  const loading = document.getElementById('loading');
-  if (loading) {
-    loading.classList.add('hide');
-    setTimeout(() => loading.remove(), 300);
-  }
 })();
 
 // Image cache for quick swapping
@@ -769,6 +811,27 @@ function loadImageCached(src) {
 }
 
 async function cycleCategory(category, dir) {
+  // Handle EDC cycling separately
+  if (category === 'edc') {
+    if (!state.edcPairings || state.edcPairings.length === 0) return;
+    
+    const currentId = state.currentEDC?.id;
+    let idx = Math.max(0, state.edcPairings.findIndex(x => x.id === currentId));
+    
+    // Cycle through EDC pairings
+    idx = (idx + dir + state.edcPairings.length) % state.edcPairings.length;
+    const newPairing = state.edcPairings[idx];
+    
+    // Load new EDC images
+    const edcImages = await loadEDCImages(newPairing);
+    currentSel.edcImages = edcImages;
+    state.currentEDC = newPairing;
+    
+    draw(currentSel, document.getElementById('c'));
+    return;
+  }
+  
+  // Handle outfit item cycling
   const pools = state.currentPools || categorize();
   const sel = {...currentSel};
   const arrays = {

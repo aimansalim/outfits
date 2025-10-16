@@ -52,31 +52,9 @@
         footer.mobile { display: block; }
         .canvas-wrap { padding-bottom: 60px; }
       }
-      
-      /* Loading state */
-      #loading {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: #fff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 9999;
-        font-size: 14px;
-        color: #666;
-        transition: opacity 0.3s;
-      }
-      #loading.hide {
-        opacity: 0;
-        pointer-events: none;
-      }
     </style>
   </head>
   <body>
-    <div id="loading">Loading outfit generator...</div>
     <div class="wrap">
       <header class="desktop">
         <a href="#" id="create">Create</a>
