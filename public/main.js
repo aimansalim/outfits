@@ -358,30 +358,33 @@ function draw(sel, canvas) {
     const dy = Math.floor(c.y + (c.s - dh) / 2);
     ctx.drawImage(img, dx, dy, dw, dh);
 
-    // Draw minimal arrows and register hitboxes
-    const arrowW = Math.max(10 * DPR, Math.round(c.s * 0.12));
-    const arrowH = Math.max(10 * DPR, Math.round(c.s * 0.28));
+    // Draw ultra-minimal side arrows (“<” and “>”) OUTSIDE the square
     const midY = Math.floor(c.y + c.s / 2);
-    const pad = Math.floor(c.s * 0.06);
-    const leftRect = {x: c.x + pad, y: midY - Math.floor(arrowH/2), w: arrowW, h: arrowH};
-    const rightRect = {x: c.x + c.s - pad - arrowW, y: midY - Math.floor(arrowH/2), w: arrowW, h: arrowH};
-    state.arrowHitboxes.push({rect: leftRect, category: c.category, dir: -1});
-    state.arrowHitboxes.push({rect: rightRect, category: c.category, dir: +1});
+    const padSide = Math.max(4 * DPR, Math.round(c.s * 0.06));
+    const fontPx = Math.max(12 * DPR, Math.round(c.s * 0.14));
+    ctx.save();
+    ctx.font = `${fontPx}px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace`;
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'center';
     ctx.fillStyle = '#000';
-    // Left triangle
-    ctx.beginPath();
-    ctx.moveTo(leftRect.x + leftRect.w, leftRect.y);
-    ctx.lineTo(leftRect.x, midY);
-    ctx.lineTo(leftRect.x + leftRect.w, leftRect.y + leftRect.h);
-    ctx.closePath();
-    ctx.fill();
-    // Right triangle
-    ctx.beginPath();
-    ctx.moveTo(rightRect.x, rightRect.y);
-    ctx.lineTo(rightRect.x + rightRect.w, midY);
-    ctx.lineTo(rightRect.x, rightRect.y + rightRect.h);
-    ctx.closePath();
-    ctx.fill();
+    ctx.globalAlpha = 0.6;
+    const leftText = '<';
+    const rightText = '>';
+    const leftW = Math.ceil(ctx.measureText(leftText).width);
+    const rightW = Math.ceil(ctx.measureText(rightText).width);
+    let leftX = c.x - padSide - Math.ceil(leftW / 2);
+    let rightX = c.x + c.s + padSide + Math.ceil(rightW / 2);
+    // Clamp inside canvas
+    leftX = Math.max(leftW / 2, leftX);
+    rightX = Math.min(W - rightW / 2, rightX);
+    ctx.fillText(leftText, leftX, midY);
+    ctx.fillText(rightText, rightX, midY);
+    ctx.restore();
+    const hitH = Math.ceil(fontPx * 1.2);
+    const hitWL = Math.max(leftW, fontPx);
+    const hitWR = Math.max(rightW, fontPx);
+    state.arrowHitboxes.push({rect: {x: Math.floor(leftX - hitWL / 2), y: Math.floor(midY - hitH / 2), w: hitWL, h: hitH}, category: c.category, dir: -1});
+    state.arrowHitboxes.push({rect: {x: Math.floor(rightX - hitWR / 2), y: Math.floor(midY - hitH / 2), w: hitWR, h: hitH}, category: c.category, dir: +1});
   }
   ctx.restore();
   state.lastCells = cells;
