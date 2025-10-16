@@ -127,26 +127,26 @@ function updateUserMenu(currentUser, viewingUsername) {
     const displayName = currentUser.displayName || currentUser.email.split('@')[0];
     if (viewingUsername && viewingUsername !== currentUser.displayName) {
       userMenu.innerHTML = `
-        <span style="font-size: 12px; color: #666; margin-right: 12px;">Viewing ${viewingUsername}'s closet</span>
-        <a href="index.html">My Closet</a>
-        <a href="upload.html">Upload</a>
-        <a href="#" onclick="logout()" style="color: #c00;">Logout (${displayName})</a>
+        <span class="user-info">Viewing ${viewingUsername}'s closet</span>
+        <a href="index.html" class="button">My Closet</a>
+        <a href="upload.html" class="button">Upload</a>
+        <button onclick="logout()" class="logout">Logout (${displayName})</button>
       `;
     } else {
       userMenu.innerHTML = `
-        <span style="font-size: 12px; color: #666; margin-right: 12px;">@${displayName}</span>
-        <a href="upload.html">Upload</a>
-        <a href="#" onclick="logout()" style="color: #c00;">Logout</a>
+        <span class="user-info">@${displayName}</span>
+        <a href="upload.html" class="button">Upload</a>
+        <button onclick="logout()" class="logout">Logout</button>
       `;
     }
   } else {
     if (viewingUsername) {
       userMenu.innerHTML = `
-        <span style="font-size: 12px; color: #666; margin-right: 12px;">${viewingUsername}'s closet</span>
-        <a href="auth.html">Login / Sign up</a>
+        <span class="user-info">${viewingUsername}'s closet</span>
+        <a href="auth.html" class="button">Login / Sign up</a>
       `;
     } else {
-      userMenu.innerHTML = `<a href="auth.html">Login / Sign up</a>`;
+      userMenu.innerHTML = `<a href="auth.html" class="button">Login / Sign up</a>`;
     }
   }
 }
@@ -733,12 +733,10 @@ let currentSel = null;
 
 function hookup() {
   const canvas = document.getElementById('c');
-  const create = document.getElementById('create');
   const jacket = document.getElementById('jacket');
   const edc = document.getElementById('edc');
   const remix = document.getElementById('remix');
   const download = document.getElementById('download');
-  const save15 = document.getElementById('save15');
   
   // Mobile buttons
   const jacketMobile = document.getElementById('jacket-mobile');
@@ -760,22 +758,19 @@ function hookup() {
     }
   }
 
-  function toggleJacket(e) {
-    e.preventDefault(); 
+  function toggleJacket() {
     state.includeJacket = !state.includeJacket; 
     updateJacketLabel(); 
     regenerate('jacket');
   }
   
-  function toggleEDC(e) {
-    e.preventDefault(); 
+  function toggleEDC() {
     state.includeEDC = !state.includeEDC; 
     updateEDCLabel(); 
     regenerate('edc');
   }
 
-  function doRemix(e) {
-    e.preventDefault(); 
+  function doRemix() {
     regenerate('remix');
   }
 
@@ -850,8 +845,7 @@ function hookup() {
     return tempCanvas;
   }
   
-  function doSave(e) {
-    e.preventDefault();
+  function doSave() {
     const targetWidth = 1080;
     const targetHeight = 1920;
     const tempCanvas = renderToCanvas(targetWidth, targetHeight, currentSel);
@@ -862,7 +856,6 @@ function hookup() {
     link.click();
   }
 
-  create.addEventListener('click', (e) => { e.preventDefault(); state.seed = 0; regenerate('create'); });
   jacket.addEventListener('click', toggleJacket);
   edc.addEventListener('click', toggleEDC);
   remix.addEventListener('click', doRemix);
@@ -873,26 +866,6 @@ function hookup() {
   if (edcMobile) edcMobile.addEventListener('click', toggleEDC);
   if (remixMobile) remixMobile.addEventListener('click', doRemix);
   if (saveMobile) saveMobile.addEventListener('click', doSave);
-
-  save15.addEventListener('click', async (e) => {
-    e.preventDefault();
-    // Generate and download 15 deterministic outfits that pass constraints
-    const startSeed = state.seed;
-    const targetWidth = 1080;
-    const targetHeight = 1920;
-    
-    for (let i = 0; i < 15; i++) {
-      await regenerate('remix');
-      const tempCanvas = renderToCanvas(targetWidth, targetHeight, currentSel);
-      
-      const link = document.createElement('a');
-      link.download = `outfit-${String(i+1).padStart(2,'0')}.png`;
-      link.href = tempCanvas.toDataURL('image/png');
-      link.click();
-    }
-    // restore seed base if desired
-    state.seed = startSeed;
-  });
 
   window.addEventListener('resize', () => { if (currentSel) draw(currentSel, canvas); });
   

@@ -53,9 +53,51 @@
       }
       
       /* Desktop header */
-      header.desktop { text-align: right; padding: 8px 10px; display: block; }
-      header.desktop a { color: #000; text-decoration: none; margin-left: 12px; }
-      header.desktop a:hover { text-decoration: underline; }
+      header.desktop { 
+        padding: 16px 20px;
+        border-bottom: 1px solid #ddd;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      header.desktop h1 {
+        font-size: 18px;
+        font-weight: 600;
+        margin: 0;
+      }
+      header.desktop .controls {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      header.desktop button, header.desktop a.button {
+        background: #fff;
+        border: 1px solid #ddd;
+        padding: 8px 16px;
+        font-family: inherit;
+        font-size: 12px;
+        cursor: pointer;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #000;
+        text-decoration: none;
+        display: inline-block;
+      }
+      header.desktop button:hover, header.desktop a.button:hover {
+        background: #f5f5f5;
+      }
+      header.desktop .user-info {
+        font-size: 12px;
+        color: #666;
+        margin-right: 12px;
+      }
+      header.desktop button.logout {
+        color: #c00;
+        border-color: #fcc;
+      }
+      header.desktop button.logout:hover {
+        background: #fee;
+      }
       
       /* Mobile footer */
       footer.mobile {
@@ -84,7 +126,7 @@
       }
       
       @media (max-width: 768px) {
-        header.desktop { display: none; }
+        header.desktop { display: none !important; }
         footer.mobile { display: block; }
         .canvas-wrap { padding-bottom: 45px; }
       }
@@ -93,13 +135,14 @@
   <body>
     <div class="wrap">
       <header class="desktop">
-        <a href="#" id="create">Create</a>
-        <a href="#" id="jacket">Jacket: OFF</a>
-        <a href="#" id="edc">EDC: OFF</a>
-        <a href="#" id="remix">Remix</a>
-        <a href="#" id="download">Download</a>
-        <a href="#" id="save15">Save 15</a>
-        <span style="margin-left: auto;" id="user-menu"></span>
+        <h1>Outfit Generator</h1>
+        <div class="controls">
+          <button id="jacket">Jacket: OFF</button>
+          <button id="edc">EDC: OFF</button>
+          <button id="remix">Remix</button>
+          <button id="download">Save</button>
+          <div id="user-menu"></div>
+        </div>
       </header>
       <div class="canvas-wrap">
         <canvas id="c"></canvas>
