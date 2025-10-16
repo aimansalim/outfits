@@ -1,0 +1,91 @@
+[
+  {
+    "id": "tech-minimal",
+    "name": "Tech Minimal",
+    "styleHints": ["casual", "formal"],
+    "colorHints": ["black", "white", "grey"],
+    "items": [
+      { "file": "assets/edc/tech/WHITE-AIRPODS-PRO.png", "category": "tech", "position": "pocket" },
+      { "file": "assets/edc/wearables/BLACK-MIBAND-10.png", "category": "wearable", "position": "wrist" }
+    ]
+  },
+  {
+    "id": "work-setup",
+    "name": "Work Setup",
+    "styleHints": ["casual", "formal"],
+    "colorHints": ["black", "grey", "white", "navy", "beige"],
+    "items": [
+      { "file": "assets/edc/bags/BLACK-CLASSIC-BOREALIS.png", "category": "bag", "position": "bag" },
+      { "file": "assets/edc/tech/BLACK-MACBOOK-PRO-M4-PRO.png", "category": "tech", "position": "bag-item" },
+      { "file": "assets/edc/tech/BLACK-LEATHER-MACBOOK-CASE.png", "category": "tech", "position": "bag-item" },
+      { "file": "assets/edc/tech/WHITE-AIRPODS-PRO.png", "category": "tech", "position": "pocket" }
+    ]
+  },
+  {
+    "id": "urban-classic",
+    "name": "Urban Classic",
+    "styleHints": ["casual", "street"],
+    "colorHints": ["black", "white", "grey"],
+    "items": [
+      { "file": "assets/edc/bags/BLACK-CLASSIC-BOREALIS.png", "category": "bag", "position": "bag" },
+      { "file": "assets/edc/wearables/CASIO-DW-5600BCE-1ER-BLACKOUT.png", "category": "wearable", "position": "wrist" },
+      { "file": "assets/edc/tech/WHITE-AIRPODS-PRO.png", "category": "tech", "position": "pocket" }
+    ]
+  },
+  {
+    "id": "outdoor-explorer",
+    "name": "Outdoor Explorer",
+    "styleHints": ["casual", "street"],
+    "colorHints": ["khaki", "green", "beige", "brown"],
+    "items": [
+      { "file": "assets/edc/bags/KHAKI-GRANVILLE-16-ARCTERYX.png", "category": "bag", "position": "bag" },
+      { "file": "assets/edc/tech/GREY-IPAD-A16.png", "category": "tech", "position": "bag-item" },
+      { "file": "assets/edc/wearables/CASIO-DW-5600BCE-1ER-BLACKOUT.png", "category": "wearable", "position": "wrist" }
+    ]
+  },
+  {
+    "id": "light-carry",
+    "name": "Light Carry",
+    "styleHints": ["casual", "formal", "street"],
+    "colorHints": ["grey", "white", "black"],
+    "items": [
+      { "file": "assets/edc/tech/GREY-IPAD-A16.png", "category": "tech", "position": "hand" },
+      { "file": "assets/edc/tech/GREY-ASTUCCIO-EASTPACK.png", "category": "tech", "position": "pocket" },
+      { "file": "assets/edc/tech/WHITE-AIRPODS-PRO.png", "category": "tech", "position": "pocket" }
+    ]
+  },
+  {
+    "id": "sport-active",
+    "name": "Sport Active",
+    "styleHints": ["sport", "street"],
+    "colorHints": ["black", "white", "grey"],
+    "items": [
+      { "file": "assets/edc/wearables/BLACK-MIBAND-10.png", "category": "wearable", "position": "wrist" },
+      { "file": "assets/edc/tech/WHITE-AIRPODS-PRO.png", "category": "tech", "position": "pocket" },
+      { "file": "assets/edc/sport/BLACK-ROAD-BIKE-TRIBAN-RC500.png", "category": "sport", "position": "bike" }
+    ]
+  },
+  {
+    "id": "student-mode",
+    "name": "Student Mode",
+    "styleHints": ["casual", "street"],
+    "colorHints": ["black", "grey", "white"],
+    "items": [
+      { "file": "assets/edc/bags/BLACK-CLASSIC-BOREALIS.png", "category": "bag", "position": "bag" },
+      { "file": "assets/edc/tech/GREY-IPAD-A16.png", "category": "tech", "position": "bag-item" },
+      { "file": "assets/edc/tech/GREY-ASTUCCIO-EASTPACK.png", "category": "tech", "position": "bag-item" },
+      { "file": "assets/edc/tech/WHITE-AIRPODS-PRO.png", "category": "tech", "position": "pocket" }
+    ]
+  },
+  {
+    "id": "minimalist-pro",
+    "name": "Minimalist Pro",
+    "styleHints": ["formal", "casual"],
+    "colorHints": ["black", "white", "grey", "navy"],
+    "items": [
+      { "file": "assets/edc/wearables/CASIO-DW-5600BCE-1ER-BLACKOUT.png", "category": "wearable", "position": "wrist" },
+      { "file": "assets/edc/tech/WHITE-AIRPODS-PRO.png", "category": "tech", "position": "pocket" }
+    ]
+  }
+]
+

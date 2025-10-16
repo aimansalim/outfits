@@ -3,10 +3,13 @@ const DPR = Math.max(1, Math.floor(window.devicePixelRatio || 1));
 const state = {
   manifest: [],
   includeJacket: false,
+  includeEDC: false,
   seed: 0,
   lastSelected: null, // persisted across actions
   currentStyle: 'casual',
   currentPools: null,
+  edcPairings: [],
+  currentEDC: null,
 };
 
 // Deterministic PRNG (Mulberry32) seeded per action
@@ -46,6 +49,17 @@ async function loadManifest() {
     state.lastSelected = JSON.parse(localStorage.getItem('lastSelected') || 'null');
   } catch (_) {
     state.lastSelected = null;
+  }
+}
+
+async function loadEDCPairings() {
+  try {
+    const res = await fetch('edc-pairings.json');
+    const data = await res.json();
+    state.edcPairings = data;
+  } catch (err) {
+    console.warn('EDC pairings not found:', err);
+    state.edcPairings = [];
   }
 }
 
@@ -165,6 +179,43 @@ function validCombo(sel) {
     for (let j = i + 1; j < items.length; j++)
       if (isStyleConflict(items[i], items[j])) return false;
   return true;
+}
+
+function chooseEDCPairing(sel, rng) {
+  if (!state.edcPairings || state.edcPairings.length === 0) return null;
+  
+  // Collect style and color hints from outfit
+  const outfitStyles = new Set();
+  const outfitColors = new Set();
+  const items = Object.values(sel).filter(Boolean);
+  for (const it of items) {
+    for (const s of it.styleHints || []) outfitStyles.add(s);
+    for (const c of it.colorHints || []) outfitColors.add(c);
+  }
+  
+  // Score each EDC pairing based on compatibility
+  const scored = state.edcPairings.map(pairing => {
+    let score = 0;
+    // Style match
+    for (const style of pairing.styleHints || []) {
+      if (outfitStyles.has(style)) score += 10;
+    }
+    // Color match
+    for (const color of pairing.colorHints || []) {
+      if (outfitColors.has(color)) score += 5;
+    }
+    // Fallback: any pairing gets at least 1 point
+    if (score === 0) score = 1;
+    return { pairing, score };
+  });
+  
+  // Sort by score descending
+  scored.sort((a, b) => b.score - a.score);
+  
+  // Pick from top 3 candidates deterministically
+  const topCandidates = scored.slice(0, Math.min(3, scored.length));
+  const idx = Math.floor(rng() * topCandidates.length);
+  return topCandidates[idx].pairing;
 }
 
 function generateOutfit(pools, rng) {
@@ -326,6 +377,24 @@ async function loadImages(sel) {
   return images;
 }
 
+async function loadEDCImages(pairing) {
+  if (!pairing || !pairing.items) return [];
+  const load = (src) => new Promise((res, rej) => {
+    const img = new Image();
+    img.onload = () => res(img);
+    img.onerror = (e) => { console.warn('Failed to load EDC image:', src, e); res(null); };
+    img.src = src;
+  });
+  const images = [];
+  for (const item of pairing.items) {
+    const img = await load(item.file);
+    if (img) {
+      images.push({ img, item });
+    }
+  }
+  return images;
+}
+
 function draw(sel, canvas) {
   const ctx = canvas.getContext('2d');
   const cssW = canvas.clientWidth;
@@ -387,6 +456,58 @@ function draw(sel, canvas) {
     state.arrowHitboxes.push({rect: {x: Math.floor(leftX - hitWL / 2), y: Math.floor(midY - hitH / 2), w: hitWL, h: hitH}, category: c.category, dir: -1});
     state.arrowHitboxes.push({rect: {x: Math.floor(rightX - hitWR / 2), y: Math.floor(midY - hitH / 2), w: hitWR, h: hitH}, category: c.category, dir: +1});
   }
+  
+  // Draw EDC items if enabled
+  if (state.includeEDC && sel.edcImages && sel.edcImages.length > 0) {
+    const edcSize = Math.floor(S * 0.35); // EDC items are smaller
+    let bagOffsetX = 0;
+    let wearableOffsetY = 0;
+    
+    for (const { img, item } of sel.edcImages) {
+      const iw = img.naturalWidth;
+      const ih = img.naturalHeight;
+      const scale = Math.min(edcSize / iw, edcSize / ih);
+      const dw = Math.floor(iw * scale);
+      const dh = Math.floor(ih * scale);
+      
+      let edcX, edcY;
+      
+      // Position based on item position hint
+      if (item.position === 'bag' || item.category === 'bag') {
+        // Bottom left area
+        edcX = Math.floor(W * 0.08 + bagOffsetX);
+        edcY = Math.floor(H * 0.75);
+        bagOffsetX += dw + 10 * DPR;
+      } else if (item.position === 'wrist' || item.category === 'wearable') {
+        // Top right area
+        edcX = Math.floor(W * 0.8);
+        edcY = Math.floor(H * 0.12 + wearableOffsetY);
+        wearableOffsetY += dh + 8 * DPR;
+      } else if (item.position === 'bike' || item.category === 'sport') {
+        // Bottom right
+        edcX = Math.floor(W * 0.75);
+        edcY = Math.floor(H * 0.80);
+      } else if (item.position === 'hand') {
+        // Middle right
+        edcX = Math.floor(W * 0.78);
+        edcY = Math.floor(H * 0.45);
+      } else if (item.position === 'bag-item') {
+        // Skip bag items, they're implied to be inside the bag
+        continue;
+      } else {
+        // pocket or other - bottom middle/right
+        edcX = Math.floor(W * 0.6 + (Math.random() * 0.15 * W));
+        edcY = Math.floor(H * 0.82);
+      }
+      
+      // Draw with slight transparency to not overpower outfit
+      ctx.save();
+      ctx.globalAlpha = 0.85;
+      ctx.drawImage(img, edcX - Math.floor(dw/2), edcY - Math.floor(dh/2), dw, dh);
+      ctx.restore();
+    }
+  }
+  
   ctx.restore();
   state.lastCells = cells;
 }
@@ -401,6 +522,20 @@ async function regenerate(kind) {
   const sel = generateOutfit(pools, rng);
   const images = await loadImages(sel);
   sel.images = images;
+  
+  // Load EDC if enabled
+  if (state.includeEDC) {
+    const edcPairing = chooseEDCPairing(sel, rng);
+    if (edcPairing) {
+      const edcImages = await loadEDCImages(edcPairing);
+      sel.edcImages = edcImages;
+      state.currentEDC = edcPairing;
+    }
+  } else {
+    sel.edcImages = [];
+    state.currentEDC = null;
+  }
+  
   draw(sel, document.getElementById('c'));
   currentSel = sel;
   // persist last selection ids to rotate next time
@@ -421,19 +556,28 @@ function hookup() {
   const canvas = document.getElementById('c');
   const create = document.getElementById('create');
   const jacket = document.getElementById('jacket');
+  const edc = document.getElementById('edc');
   const remix = document.getElementById('remix');
   const download = document.getElementById('download');
   const save15 = document.getElementById('save15');
   
   // Mobile buttons
   const jacketMobile = document.getElementById('jacket-mobile');
+  const edcMobile = document.getElementById('edc-mobile');
   const remixMobile = document.getElementById('remix-mobile');
   const saveMobile = document.getElementById('save-mobile');
 
   function updateJacketLabel() {
     jacket.textContent = `Jacket: ${state.includeJacket ? 'ON' : 'OFF'}`;
     if (jacketMobile) {
-      jacketMobile.textContent = state.includeJacket ? 'ON' : 'OFF';
+      jacketMobile.textContent = `J: ${state.includeJacket ? 'ON' : 'OFF'}`;
+    }
+  }
+  
+  function updateEDCLabel() {
+    edc.textContent = `EDC: ${state.includeEDC ? 'ON' : 'OFF'}`;
+    if (edcMobile) {
+      edcMobile.textContent = `EDC: ${state.includeEDC ? 'ON' : 'OFF'}`;
     }
   }
 
@@ -443,30 +587,35 @@ function hookup() {
     updateJacketLabel(); 
     regenerate('jacket');
   }
+  
+  function toggleEDC(e) {
+    e.preventDefault(); 
+    state.includeEDC = !state.includeEDC; 
+    updateEDCLabel(); 
+    regenerate('edc');
+  }
 
   function doRemix(e) {
     e.preventDefault(); 
     regenerate('remix');
   }
 
-  function doSave(e) {
-    e.preventDefault();
-    // Create a temporary canvas with 9:16 aspect ratio
+  function renderToCanvas(targetWidth, targetHeight, sel) {
     const tempCanvas = document.createElement('canvas');
-    const targetWidth = 1080;
-    const targetHeight = 1920;
     tempCanvas.width = targetWidth;
     tempCanvas.height = targetHeight;
     
-    // Render the current outfit on the temp canvas
     const ctx = tempCanvas.getContext('2d');
     ctx.fillStyle = '#fff';
     ctx.fillRect(0, 0, targetWidth, targetHeight);
     
-    const cells = layoutSquares(targetWidth, targetHeight, !!currentSel.outerwear);
+    const cells = layoutSquares(targetWidth, targetHeight, !!sel.outerwear);
+    const S = cells[0]?.s || 100;
+    
+    // Draw outfit items
     for (const c of cells) {
-      const img = currentSel.images[c.category] || (c.category === 'top_base' ? currentSel.images.top_base : 
-                   c.category === 'top_overshirt' ? currentSel.images.top_overshirt : null);
+      const img = sel.images[c.category] || (c.category === 'top_base' ? sel.images.top_base : 
+                   c.category === 'top_overshirt' ? sel.images.top_overshirt : null);
       if (!img) continue;
       const iw = img.naturalWidth;
       const ih = img.naturalHeight;
@@ -478,6 +627,58 @@ function hookup() {
       ctx.drawImage(img, dx, dy, dw, dh);
     }
     
+    // Draw EDC items if enabled
+    if (state.includeEDC && sel.edcImages && sel.edcImages.length > 0) {
+      const edcSize = Math.floor(S * 0.35);
+      let bagOffsetX = 0;
+      let wearableOffsetY = 0;
+      
+      for (const { img, item } of sel.edcImages) {
+        const iw = img.naturalWidth;
+        const ih = img.naturalHeight;
+        const scale = Math.min(edcSize / iw, edcSize / ih);
+        const dw = Math.floor(iw * scale);
+        const dh = Math.floor(ih * scale);
+        
+        let edcX, edcY;
+        
+        if (item.position === 'bag' || item.category === 'bag') {
+          edcX = Math.floor(targetWidth * 0.08 + bagOffsetX);
+          edcY = Math.floor(targetHeight * 0.75);
+          bagOffsetX += dw + 10;
+        } else if (item.position === 'wrist' || item.category === 'wearable') {
+          edcX = Math.floor(targetWidth * 0.8);
+          edcY = Math.floor(targetHeight * 0.12 + wearableOffsetY);
+          wearableOffsetY += dh + 8;
+        } else if (item.position === 'bike' || item.category === 'sport') {
+          edcX = Math.floor(targetWidth * 0.75);
+          edcY = Math.floor(targetHeight * 0.80);
+        } else if (item.position === 'hand') {
+          edcX = Math.floor(targetWidth * 0.78);
+          edcY = Math.floor(targetHeight * 0.45);
+        } else if (item.position === 'bag-item') {
+          continue;
+        } else {
+          edcX = Math.floor(targetWidth * 0.6 + (Math.random() * 0.15 * targetWidth));
+          edcY = Math.floor(targetHeight * 0.82);
+        }
+        
+        ctx.save();
+        ctx.globalAlpha = 0.85;
+        ctx.drawImage(img, edcX - Math.floor(dw/2), edcY - Math.floor(dh/2), dw, dh);
+        ctx.restore();
+      }
+    }
+    
+    return tempCanvas;
+  }
+  
+  function doSave(e) {
+    e.preventDefault();
+    const targetWidth = 1080;
+    const targetHeight = 1920;
+    const tempCanvas = renderToCanvas(targetWidth, targetHeight, currentSel);
+    
     const link = document.createElement('a');
     link.download = 'outfit.png';
     link.href = tempCanvas.toDataURL('image/png');
@@ -486,11 +687,13 @@ function hookup() {
 
   create.addEventListener('click', (e) => { e.preventDefault(); state.seed = 0; regenerate('create'); });
   jacket.addEventListener('click', toggleJacket);
+  edc.addEventListener('click', toggleEDC);
   remix.addEventListener('click', doRemix);
   download.addEventListener('click', doSave);
 
   // Mobile event listeners
   if (jacketMobile) jacketMobile.addEventListener('click', toggleJacket);
+  if (edcMobile) edcMobile.addEventListener('click', toggleEDC);
   if (remixMobile) remixMobile.addEventListener('click', doRemix);
   if (saveMobile) saveMobile.addEventListener('click', doSave);
 
@@ -498,34 +701,12 @@ function hookup() {
     e.preventDefault();
     // Generate and download 15 deterministic outfits that pass constraints
     const startSeed = state.seed;
+    const targetWidth = 1080;
+    const targetHeight = 1920;
+    
     for (let i = 0; i < 15; i++) {
       await regenerate('remix');
-      
-      // Create temp canvas with 9:16 aspect ratio
-      const tempCanvas = document.createElement('canvas');
-      const targetWidth = 1080;
-      const targetHeight = 1920;
-      tempCanvas.width = targetWidth;
-      tempCanvas.height = targetHeight;
-      
-      const ctx = tempCanvas.getContext('2d');
-      ctx.fillStyle = '#fff';
-      ctx.fillRect(0, 0, targetWidth, targetHeight);
-      
-      const cells = layoutSquares(targetWidth, targetHeight, !!currentSel.outerwear);
-      for (const c of cells) {
-        const img = currentSel.images[c.category] || (c.category === 'top_base' ? currentSel.images.top_base : 
-                     c.category === 'top_overshirt' ? currentSel.images.top_overshirt : null);
-        if (!img) continue;
-        const iw = img.naturalWidth;
-        const ih = img.naturalHeight;
-        const scale = Math.min(c.s / iw, c.s / ih);
-        const dw = Math.floor(iw * scale);
-        const dh = Math.floor(ih * scale);
-        const dx = Math.floor(c.x + (c.s - dw) / 2);
-        const dy = Math.floor(c.y + (c.s - dh) / 2);
-        ctx.drawImage(img, dx, dy, dw, dh);
-      }
+      const tempCanvas = renderToCanvas(targetWidth, targetHeight, currentSel);
       
       const link = document.createElement('a');
       link.download = `outfit-${String(i+1).padStart(2,'0')}.png`;
@@ -547,10 +728,12 @@ function hookup() {
     await cycleCategory(hit.category, hit.dir);
   });
   updateJacketLabel();
+  updateEDCLabel();
 }
 
 (async function init() {
   await loadManifest();
+  await loadEDCPairings();
   hookup();
   await regenerate('create');
 })();
