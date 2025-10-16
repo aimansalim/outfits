@@ -424,23 +424,48 @@ function hookup() {
   const remix = document.getElementById('remix');
   const download = document.getElementById('download');
   const save15 = document.getElementById('save15');
+  
+  // Mobile buttons
+  const jacketMobile = document.getElementById('jacket-mobile');
+  const remixMobile = document.getElementById('remix-mobile');
+  const saveMobile = document.getElementById('save-mobile');
 
   function updateJacketLabel() {
     jacket.textContent = `Jacket: ${state.includeJacket ? 'ON' : 'OFF'}`;
+    if (jacketMobile) {
+      jacketMobile.textContent = state.includeJacket ? 'ON' : 'OFF';
+    }
   }
 
-  create.addEventListener('click', (e) => { e.preventDefault(); state.seed = 0; regenerate('create'); });
-  jacket.addEventListener('click', (e) => {
-    e.preventDefault(); state.includeJacket = !state.includeJacket; updateJacketLabel(); regenerate('jacket');
-  });
-  remix.addEventListener('click', (e) => { e.preventDefault(); regenerate('remix'); });
-  download.addEventListener('click', (e) => {
+  function toggleJacket(e) {
+    e.preventDefault(); 
+    state.includeJacket = !state.includeJacket; 
+    updateJacketLabel(); 
+    regenerate('jacket');
+  }
+
+  function doRemix(e) {
+    e.preventDefault(); 
+    regenerate('remix');
+  }
+
+  function doSave(e) {
     e.preventDefault();
     const link = document.createElement('a');
     link.download = 'outfit.png';
     link.href = document.getElementById('c').toDataURL('image/png');
     link.click();
-  });
+  }
+
+  create.addEventListener('click', (e) => { e.preventDefault(); state.seed = 0; regenerate('create'); });
+  jacket.addEventListener('click', toggleJacket);
+  remix.addEventListener('click', doRemix);
+  download.addEventListener('click', doSave);
+
+  // Mobile event listeners
+  if (jacketMobile) jacketMobile.addEventListener('click', toggleJacket);
+  if (remixMobile) remixMobile.addEventListener('click', doRemix);
+  if (saveMobile) saveMobile.addEventListener('click', doSave);
 
   save15.addEventListener('click', async (e) => {
     e.preventDefault();

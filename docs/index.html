@@ -5,34 +5,76 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Outfit</title>
     <style>
-      html, body { height: 100%; }
+      html, body { height: 100%; overflow: hidden; }
       body {
         margin: 0;
         background: #fff;
         font: 12px/1.2 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
         color: #000;
       }
-      .wrap { display: grid; grid-template-rows: auto 1fr; height: 100%; }
-      header { text-align: right; padding: 8px 10px; }
-      a { color: #000; text-decoration: none; margin-left: 12px; }
-      a:hover { text-decoration: underline; }
-      canvas { width: 100%; height: calc(100vh - 28px); display: block; background: #fff; }
+      .wrap { display: flex; flex-direction: column; height: 100%; }
+      .canvas-wrap { flex: 1; position: relative; overflow: hidden; }
+      canvas { width: 100%; height: 100%; display: block; background: #fff; }
+      
+      /* Desktop header */
+      header.desktop { text-align: right; padding: 8px 10px; display: block; }
+      header.desktop a { color: #000; text-decoration: none; margin-left: 12px; }
+      header.desktop a:hover { text-decoration: underline; }
+      
+      /* Mobile footer */
+      footer.mobile {
+        display: none;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #fff;
+        padding: 16px;
+        text-align: center;
+        border-top: 1px solid #ddd;
+        z-index: 1000;
+      }
+      footer.mobile a {
+        color: #000;
+        text-decoration: none;
+        margin: 0 16px;
+        font-size: 14px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      footer.mobile a:active {
+        opacity: 0.6;
+      }
+      
+      @media (max-width: 768px) {
+        header.desktop { display: none; }
+        footer.mobile { display: block; }
+        .canvas-wrap { padding-bottom: 60px; }
+      }
     </style>
   </head>
   <body>
     <div class="wrap">
-      <header>
+      <header class="desktop">
         <a href="#" id="create">Create</a>
         <a href="#" id="jacket">Jacket: OFF</a>
         <a href="#" id="remix">Remix</a>
         <a href="#" id="download">Download</a>
-        <a href="#" id="save15">Save</a>
+        <a href="#" id="save15">Save 15</a>
       </header>
-      <canvas id="c"></canvas>
+      <div class="canvas-wrap">
+        <canvas id="c"></canvas>
+      </div>
+      <footer class="mobile">
+        <a href="#" id="jacket-mobile">OFF</a>
+        <a href="#" id="remix-mobile">REMIX</a>
+        <a href="#" id="save-mobile">SAVE</a>
+      </footer>
     </div>
     <script type="module" src="main.js"></script>
   </body>
-  </html>
+</html>
 
 
 
