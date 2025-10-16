@@ -3,13 +3,14 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Login - Outfit Generator</title>
+    <title>auth</title>
     <style>
-      * { box-sizing: border-box; margin: 0; padding: 0; }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
       body {
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font: 11px/1.4 'Monaco', 'Menlo', 'Consolas', monospace;
         background: #fff;
         color: #000;
+        letter-spacing: 0.3px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -18,268 +19,232 @@
       }
       .container {
         width: 100%;
-        max-width: 400px;
+        max-width: 360px;
+        border: 1px solid #000;
+        padding: 30px;
       }
       h1 {
-        font-size: 24px;
-        font-weight: 600;
-        margin-bottom: 8px;
-        text-align: center;
-      }
-      p {
         font-size: 14px;
-        color: #666;
-        margin-bottom: 32px;
+        font-weight: normal;
+        margin-bottom: 20px;
         text-align: center;
       }
       .form-group {
-        margin-bottom: 20px;
+        margin-bottom: 16px;
       }
       label {
         display: block;
-        font-size: 12px;
-        font-weight: 500;
-        margin-bottom: 6px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+        margin-bottom: 4px;
       }
       input {
         width: 100%;
-        padding: 12px;
-        border: 1px solid #ddd;
-        font-family: inherit;
-        font-size: 14px;
-        transition: border-color 0.2s;
+        padding: 8px;
+        border: 1px solid #000;
+        font: inherit;
+        background: #fff;
       }
       input:focus {
         outline: none;
-        border-color: #000;
+        background: #f5f5f5;
       }
       button {
         width: 100%;
-        padding: 14px;
+        padding: 10px;
         background: #000;
         color: #fff;
         border: none;
-        font-family: inherit;
-        font-size: 14px;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+        font: inherit;
         cursor: pointer;
-        transition: opacity 0.2s;
+        margin-top: 8px;
       }
       button:hover {
-        opacity: 0.8;
+        background: #333;
       }
       button:disabled {
-        opacity: 0.5;
+        opacity: 0.4;
         cursor: not-allowed;
       }
       .toggle {
         text-align: center;
         margin-top: 20px;
-        font-size: 14px;
       }
       .toggle a {
         color: #000;
-        text-decoration: underline;
         cursor: pointer;
+      }
+      .error, .success {
+        padding: 10px;
+        margin-bottom: 16px;
+        border: 1px solid #000;
+        display: none;
       }
       .error {
         background: #fee;
-        color: #c00;
-        padding: 12px;
-        margin-bottom: 20px;
-        font-size: 12px;
-        border: 1px solid #fcc;
       }
       .success {
         background: #efe;
-        color: #070;
-        padding: 12px;
-        margin-bottom: 20px;
-        font-size: 12px;
-        border: 1px solid #cfc;
       }
-      #loading {
+      .username-group {
         display: none;
-        text-align: center;
-        color: #666;
-        font-size: 14px;
-        margin-top: 20px;
+      }
+      .signup .username-group {
+        display: block;
       }
     </style>
   </head>
   <body>
     <div class="container">
-      <h1 id="form-title">Login</h1>
-      <p id="form-subtitle">Sign in to access your closet</p>
+      <h1 id="title">[login]</h1>
       
-      <div id="error-message" class="error" style="display: none;"></div>
-      <div id="success-message" class="success" style="display: none;"></div>
+      <div class="error" id="error"></div>
+      <div class="success" id="success"></div>
       
       <form id="auth-form">
+        <div class="form-group username-group">
+          <label>username</label>
+          <input type="text" id="username" autocomplete="username" />
+        </div>
+        
         <div class="form-group">
-          <label for="email">Email</label>
+          <label>email</label>
           <input type="email" id="email" required autocomplete="email" />
         </div>
         
         <div class="form-group">
-          <label for="password">Password</label>
-          <input type="password" id="password" required autocomplete="current-password" minlength="6" />
+          <label>password</label>
+          <input type="password" id="password" required autocomplete="current-password" />
         </div>
         
-        <div class="form-group" id="username-group" style="display: none;">
-          <label for="username">Username</label>
-          <input type="text" id="username" pattern="[a-zA-Z0-9_-]+" autocomplete="username" />
-          <small style="font-size: 11px; color: #666; margin-top: 4px; display: block;">Letters, numbers, dashes and underscores only</small>
-        </div>
-        
-        <button type="submit" id="submit-btn">Login</button>
+        <button type="submit" id="submit-btn">[login]</button>
       </form>
       
       <div class="toggle">
-        <span id="toggle-text">Don't have an account?</span>
-        <a id="toggle-link">Sign up</a>
+        <a id="toggle-mode">[create account]</a>
       </div>
-      
-      <div id="loading">Processing...</div>
     </div>
-    
+
     <script type="module">
       import { initFirebase } from './firebase-config.js';
-      import { 
-        signInWithEmailAndPassword, 
-        createUserWithEmailAndPassword,
-        updateProfile 
-      } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-      import { 
-        doc, 
-        setDoc,
-        getDoc 
-      } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-      
+      import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+      import { getFirestore, doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
       let auth, db;
-      let isSignup = false;
-      
+      let isSignUp = false;
+
+      const container = document.querySelector('.container');
+      const title = document.getElementById('title');
+      const form = document.getElementById('auth-form');
+      const usernameInput = document.getElementById('username');
+      const emailInput = document.getElementById('email');
+      const passwordInput = document.getElementById('password');
+      const submitBtn = document.getElementById('submit-btn');
+      const toggleMode = document.getElementById('toggle-mode');
+      const errorDiv = document.getElementById('error');
+      const successDiv = document.getElementById('success');
+
       // Initialize Firebase
       (async () => {
         const firebase = await initFirebase();
-        auth = firebase.auth;
-        db = firebase.db;
+        auth = getAuth(firebase.app);
+        db = getFirestore(firebase.app);
         
-        // Check if user is already logged in
-        auth.onAuthStateChanged((user) => {
+        // Redirect if already logged in
+        onAuthStateChanged(auth, (user) => {
           if (user) {
             window.location.href = 'index.html';
           }
         });
       })();
-      
-      const form = document.getElementById('auth-form');
-      const toggleLink = document.getElementById('toggle-link');
-      const submitBtn = document.getElementById('submit-btn');
-      const loading = document.getElementById('loading');
-      const errorMessage = document.getElementById('error-message');
-      const successMessage = document.getElementById('success-message');
-      const usernameGroup = document.getElementById('username-group');
-      const formTitle = document.getElementById('form-title');
-      const formSubtitle = document.getElementById('form-subtitle');
-      const toggleText = document.getElementById('toggle-text');
-      
-      function showError(message) {
-        errorMessage.textContent = message;
-        errorMessage.style.display = 'block';
-        successMessage.style.display = 'none';
-      }
-      
-      function showSuccess(message) {
-        successMessage.textContent = message;
-        successMessage.style.display = 'block';
-        errorMessage.style.display = 'none';
-      }
-      
-      function hideMessages() {
-        errorMessage.style.display = 'none';
-        successMessage.style.display = 'none';
-      }
-      
-      toggleLink.addEventListener('click', () => {
-        isSignup = !isSignup;
-        hideMessages();
-        
-        if (isSignup) {
-          formTitle.textContent = 'Sign Up';
-          formSubtitle.textContent = 'Create your account';
-          submitBtn.textContent = 'Sign Up';
-          toggleText.textContent = 'Already have an account?';
-          toggleLink.textContent = 'Login';
-          usernameGroup.style.display = 'block';
-          document.getElementById('username').required = true;
+
+      // Toggle between login and signup
+      toggleMode.addEventListener('click', () => {
+        isSignUp = !isSignUp;
+        if (isSignUp) {
+          container.classList.add('signup');
+          title.textContent = '[create account]';
+          submitBtn.textContent = '[sign up]';
+          toggleMode.textContent = '[login instead]';
+          usernameInput.required = true;
         } else {
-          formTitle.textContent = 'Login';
-          formSubtitle.textContent = 'Sign in to access your closet';
-          submitBtn.textContent = 'Login';
-          toggleText.textContent = "Don't have an account?";
-          toggleLink.textContent = 'Sign up';
-          usernameGroup.style.display = 'none';
-          document.getElementById('username').required = false;
+          container.classList.remove('signup');
+          title.textContent = '[login]';
+          submitBtn.textContent = '[login]';
+          toggleMode.textContent = '[create account]';
+          usernameInput.required = false;
         }
+        hideMessages();
       });
-      
+
+      function showError(msg) {
+        errorDiv.textContent = msg;
+        errorDiv.style.display = 'block';
+        successDiv.style.display = 'none';
+      }
+
+      function showSuccess(msg) {
+        successDiv.textContent = msg;
+        successDiv.style.display = 'block';
+        errorDiv.style.display = 'none';
+      }
+
+      function hideMessages() {
+        errorDiv.style.display = 'none';
+        successDiv.style.display = 'none';
+      }
+
+      // Form submission
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
         hideMessages();
         
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-        const username = document.getElementById('username').value;
+        const email = emailInput.value.trim();
+        const password = passwordInput.value;
+        const username = usernameInput.value.trim();
+        
+        if (isSignUp && !username) {
+          showError('username required');
+          return;
+        }
+        
+        if (password.length < 6) {
+          showError('password must be at least 6 characters');
+          return;
+        }
         
         submitBtn.disabled = true;
-        loading.style.display = 'block';
+        submitBtn.textContent = isSignUp ? '[creating...]' : '[logging in...]';
         
         try {
-          if (isSignup) {
-            // Check if username is available
+          if (isSignUp) {
+            // Check username uniqueness
             const usernameDoc = await getDoc(doc(db, 'usernames', username.toLowerCase()));
             if (usernameDoc.exists()) {
-              showError('Username is already taken');
+              showError('username already taken');
               submitBtn.disabled = false;
-              loading.style.display = 'none';
+              submitBtn.textContent = '[sign up]';
               return;
             }
             
-            // Create user
+            // Create account
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
+            await updateProfile(userCredential.user, { displayName: username });
             
-            // Update profile with username
-            await updateProfile(user, { displayName: username });
-            
-            // Save username mapping
-            await setDoc(doc(db, 'usernames', username.toLowerCase()), {
-              uid: user.uid,
-              username: username,
-              createdAt: new Date()
-            });
-            
-            // Create user document
-            await setDoc(doc(db, 'users', user.uid), {
-              email: email,
+            // Save username mapping and user doc
+            await setDoc(doc(db, 'usernames', username.toLowerCase()), { uid: userCredential.user.uid });
+            await setDoc(doc(db, 'users', userCredential.user.uid), {
               username: username,
               createdAt: new Date(),
               items: []
             });
             
-            showSuccess('Account created! Redirecting...');
+            showSuccess('account created! redirecting...');
             setTimeout(() => {
               window.location.href = 'upload.html';
             }, 1500);
           } else {
             // Login
             await signInWithEmailAndPassword(auth, email, password);
-            showSuccess('Login successful! Redirecting...');
+            showSuccess('login successful! redirecting...');
             setTimeout(() => {
               window.location.href = 'index.html';
             }, 1000);
@@ -287,23 +252,24 @@
         } catch (error) {
           console.error('Auth error:', error);
           let message = error.message;
+          
           if (error.code === 'auth/email-already-in-use') {
-            message = 'Email is already in use';
+            message = 'email already in use';
           } else if (error.code === 'auth/invalid-email') {
-            message = 'Invalid email address';
-          } else if (error.code === 'auth/weak-password') {
-            message = 'Password should be at least 6 characters';
+            message = 'invalid email';
           } else if (error.code === 'auth/user-not-found') {
-            message = 'No account found with this email';
+            message = 'user not found';
           } else if (error.code === 'auth/wrong-password') {
-            message = 'Incorrect password';
+            message = 'wrong password';
+          } else if (error.code === 'auth/too-many-requests') {
+            message = 'too many attempts. try again later';
           }
+          
           showError(message);
           submitBtn.disabled = false;
-          loading.style.display = 'none';
+          submitBtn.textContent = isSignUp ? '[sign up]' : '[login]';
         }
       });
     </script>
   </body>
 </html>
-
