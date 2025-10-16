@@ -11,26 +11,34 @@
 
 2. **Make sure you're logged in** as `info@aimansalim.com`
 
-3. **Select all clothing images:**
+3. **Select your entire clothing folder:**
    - Click on the upload area
-   - Navigate to: `/Users/aiman/Biz/Aiman/Coding/outfit-generator/docs/assets/`
-   - Select ALL folders: `tees/`, `midlayer/`, `jackets/`, `pants/`, `shoes/`
-   - Or select all .png files from those folders individually
+   - Navigate to: `/Users/aiman/Downloads/HIGH-QUALITY-NO-BG/`
+   - **Select the entire folder** (the browser will ask you to select a folder)
+   - The script will automatically:
+     - Include: `tees/`, `midlayer/`, `jackets/`, `pants/`, `shoes/`
+     - Skip: `accessories/` and EDC items
+     - Filter out: Generated/temp files
 
-4. **Click "Upload All Items"**
+4. **Review the selection**
+   - You'll see: "X clothing items selected (Y total files)"
+   - Breakdown by category: tops, jackets, pants, shoes
+   - Expected: ~33-35 clothing items
+
+5. **Click "Upload All Items"**
    - The page will automatically:
-     - Compress each image
-     - Detect category from folder/filename
+     - Compress each image (saves ~70% space)
+     - Detect category from folder name
      - Extract colors and styles from filename
      - Upload to Firebase Storage
      - Save to your Firestore database
    
-5. **Wait for completion**
+6. **Wait for completion**
    - You'll see a progress bar
    - Real-time log of each item being uploaded
-   - Total: ~35 items should be uploaded
+   - Takes ~2-5 minutes for 35 items
 
-6. **Done!**
+7. **Done!**
    - You'll be redirected to your closet page
    - All items will now appear in your outfit generator
 
@@ -38,19 +46,25 @@
 
 ## What the script detects:
 
-### Categories:
-- **tees/** → Top (Base Layer)
-- **midlayer/** → Top (Overshirt Layer)
-- **jackets/** → Jacket
-- **pants/** → Pants
-- **shoes/** → Shoes
+### Categories (from folder structure):
+- **tees/** or **t-shirt/** → Top (Base Layer)
+- **midlayer/** or **overshirts/** or **long-sleeve/** → Top (Overshirt Layer)
+- **jackets/** or **outerwear/** → Jacket
+- **pants/** or **trousers/** or **bottoms/** → Pants
+- **shoes/** or **footwear/** or **sneakers/** → Shoes
 
-### Colors (from filename):
+### Filters out:
+- ❌ **accessories/** folder (EDC items like bags, watches, tech)
+- ❌ Files with "Generative Fill" or "Generated Image" in the name
+- ❌ Non-image files
+
+### Colors (auto-detected from filename):
 - black, white, navy, grey/gray, beige, brown, green, blue, red
 - military → green
 - bordeaux → red
+- khaki → beige
 
-### Styles (from filename):
+### Styles (auto-detected from filename):
 - polo/button → casual
 - nike/adidas/sport → sport
 - street/hoodie → street
