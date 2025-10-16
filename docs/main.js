@@ -120,33 +120,17 @@ async function loadManifest() {
 }
 
 function updateUserMenu(currentUser, viewingUsername) {
-  const userMenu = document.getElementById('user-menu');
-  if (!userMenu) return;
+  const menuUser = document.getElementById('menu-user');
+  if (!menuUser) return;
   
   if (currentUser) {
     const displayName = currentUser.displayName || currentUser.email.split('@')[0];
-    if (viewingUsername && viewingUsername !== currentUser.displayName) {
-      userMenu.innerHTML = `
-        <span class="user-info">Viewing ${viewingUsername}'s closet</span>
-        <a href="index.html" class="button">My Closet</a>
-        <a href="upload.html" class="button">Upload</a>
-        <button onclick="logout()" class="logout">Logout (${displayName})</button>
-      `;
-    } else {
-      userMenu.innerHTML = `
-        <span class="user-info">@${displayName}</span>
-        <a href="upload.html" class="button">Upload</a>
-        <button onclick="logout()" class="logout">Logout</button>
-      `;
-    }
+    menuUser.textContent = `@${displayName}`;
   } else {
     if (viewingUsername) {
-      userMenu.innerHTML = `
-        <span class="user-info">${viewingUsername}'s closet</span>
-        <a href="auth.html" class="button">Login / Sign up</a>
-      `;
+      menuUser.textContent = `@${viewingUsername} (guest)`;
     } else {
-      userMenu.innerHTML = `<a href="auth.html" class="button">Login / Sign up</a>`;
+      menuUser.textContent = `[login]`;
     }
   }
 }
@@ -736,26 +720,21 @@ function hookup() {
   const jacket = document.getElementById('jacket');
   const edc = document.getElementById('edc');
   const remix = document.getElementById('remix');
-  const download = document.getElementById('download');
+  const save = document.getElementById('save');
   
-  // Mobile buttons
-  const jacketMobile = document.getElementById('jacket-mobile');
-  const edcMobile = document.getElementById('edc-mobile');
-  const remixMobile = document.getElementById('remix-mobile');
-  const saveMobile = document.getElementById('save-mobile');
+  // Menu toggles
+  const menuToggle = document.getElementById('menu-toggle');
+  const menuDropdown = document.getElementById('menu-dropdown');
+  const menuLogout = document.getElementById('menu-logout');
+  const optionsToggle = document.getElementById('options-toggle');
+  const optionsDropdown = document.getElementById('options-dropdown');
 
   function updateJacketLabel() {
-    jacket.textContent = `Jacket: ${state.includeJacket ? 'ON' : 'OFF'}`;
-    if (jacketMobile) {
-      jacketMobile.textContent = `J: ${state.includeJacket ? 'ON' : 'OFF'}`;
-    }
+    jacket.textContent = `J: ${state.includeJacket ? 'ON' : 'OFF'}`;
   }
-  
+
   function updateEDCLabel() {
     edc.textContent = `EDC: ${state.includeEDC ? 'ON' : 'OFF'}`;
-    if (edcMobile) {
-      edcMobile.textContent = `EDC: ${state.includeEDC ? 'ON' : 'OFF'}`;
-    }
   }
 
   function toggleJacket() {
@@ -918,13 +897,30 @@ function hookup() {
   jacket.addEventListener('click', toggleJacket);
   edc.addEventListener('click', toggleEDC);
   remix.addEventListener('click', doRemix);
-  download.addEventListener('click', doSave);
-
-  // Mobile event listeners
-  if (jacketMobile) jacketMobile.addEventListener('click', toggleJacket);
-  if (edcMobile) edcMobile.addEventListener('click', toggleEDC);
-  if (remixMobile) remixMobile.addEventListener('click', doRemix);
-  if (saveMobile) saveMobile.addEventListener('click', doSave);
+  save.addEventListener('click', doSave);
+  
+  // Menu toggles
+  menuToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    menuDropdown.classList.toggle('open');
+    optionsDropdown.classList.remove('open');
+  });
+  
+  optionsToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    optionsDropdown.classList.toggle('open');
+    menuDropdown.classList.remove('open');
+  });
+  
+  menuLogout.addEventListener('click', () => {
+    window.logout();
+  });
+  
+  // Close dropdowns when clicking outside
+  document.addEventListener('click', () => {
+    menuDropdown.classList.remove('open');
+    optionsDropdown.classList.remove('open');
+  });
 
   window.addEventListener('resize', () => { if (currentSel) draw(currentSel, canvas); });
   

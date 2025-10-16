@@ -3,165 +3,191 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Outfit</title>
+    <title>outfit</title>
     <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
       html, body { height: 100%; overflow: hidden; }
       body {
-        margin: 0;
         background: #fff;
-        font: 12px/1.2 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font: 11px/1.4 'Monaco', 'Menlo', 'Consolas', monospace;
+        color: #000;
+        letter-spacing: 0.3px;
+      }
+      
+      /* Hamburger menu - top right */
+      .menu {
+        position: fixed;
+        top: 12px;
+        right: 12px;
+        z-index: 1000;
+      }
+      .menu-btn {
+        background: none;
+        border: 1px solid #000;
+        padding: 6px 10px;
+        font: inherit;
+        cursor: pointer;
         color: #000;
       }
-      .wrap { display: flex; flex-direction: column; height: 100%; }
-      .canvas-wrap { flex: 1; position: relative; overflow: hidden; }
-      canvas { width: 100%; height: 100%; display: block; background: #fff; }
+      .menu-btn:hover { background: #f5f5f5; }
+      .menu-dropdown {
+        display: none;
+        position: absolute;
+        top: 100%;
+        right: 0;
+        margin-top: 4px;
+        background: #fff;
+        border: 1px solid #000;
+        min-width: 160px;
+      }
+      .menu-dropdown.open { display: block; }
+      .menu-dropdown a, .menu-dropdown button {
+        display: block;
+        width: 100%;
+        padding: 8px 12px;
+        background: none;
+        border: none;
+        border-bottom: 1px solid #eee;
+        font: inherit;
+        text-align: left;
+        text-decoration: none;
+        color: #000;
+        cursor: pointer;
+      }
+      .menu-dropdown a:last-child, .menu-dropdown button:last-child { border-bottom: none; }
+      .menu-dropdown a:hover, .menu-dropdown button:hover { background: #f5f5f5; }
+      .menu-dropdown .username { color: #666; cursor: default; }
+      .menu-dropdown .username:hover { background: none; }
       
+      /* Canvas */
+      .canvas-wrap {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 50px;
+        overflow: hidden;
+      }
+      canvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+        background: #fff;
+      }
+      
+      /* Empty state */
       #empty-state {
         position: absolute;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
         text-align: center;
-        padding: 40px;
-        max-width: 500px;
+        max-width: 400px;
+        padding: 20px;
       }
-      #empty-state h2 {
-        font-size: 24px;
-        margin-bottom: 12px;
-      }
+      #empty-state.hidden { display: none; }
       #empty-state p {
-        font-size: 14px;
+        margin-bottom: 16px;
         color: #666;
-        margin-bottom: 24px;
       }
       #empty-state a {
         display: inline-block;
-        background: #000;
-        color: #fff;
-        padding: 12px 24px;
-        text-decoration: none;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        font-size: 14px;
-      }
-      #empty-state a:hover {
-        opacity: 0.8;
-      }
-      #empty-state.hidden {
-        display: none;
-      }
-      
-      /* Desktop header */
-      header.desktop { 
-        padding: 16px 20px;
-        border-bottom: 1px solid #ddd;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-      header.desktop h1 {
-        font-size: 18px;
-        font-weight: 600;
-        margin: 0;
-      }
-      header.desktop .controls {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-      header.desktop button, header.desktop a.button {
-        background: #fff;
-        border: 1px solid #ddd;
         padding: 8px 16px;
-        font-family: inherit;
-        font-size: 12px;
-        cursor: pointer;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: #000;
+        border: 1px solid #000;
         text-decoration: none;
-        display: inline-block;
+        color: #000;
       }
-      header.desktop button:hover, header.desktop a.button:hover {
-        background: #f5f5f5;
-      }
-      header.desktop .user-info {
-        font-size: 12px;
-        color: #666;
-        margin-right: 12px;
-      }
-      header.desktop button.logout {
-        color: #c00;
-        border-color: #fcc;
-      }
-      header.desktop button.logout:hover {
-        background: #fee;
-      }
+      #empty-state a:hover { background: #f5f5f5; }
       
-      /* Mobile footer */
-      footer.mobile {
-        display: none;
+      /* Footer controls */
+      footer {
         position: fixed;
         bottom: 0;
         left: 0;
         right: 0;
+        height: 50px;
         background: #fff;
-        padding: 10px 8px;
-        text-align: center;
-        border-top: 1px solid #ddd;
-        z-index: 1000;
+        border-top: 1px solid #000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        z-index: 999;
       }
-      footer.mobile a {
+      footer button {
+        background: none;
+        border: 1px solid #000;
+        padding: 8px 16px;
+        font: inherit;
+        cursor: pointer;
         color: #000;
-        text-decoration: none;
-        margin: 0 6px;
-        font-size: 10px;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 0.3px;
       }
-      footer.mobile a:active {
-        opacity: 0.6;
-      }
+      footer button:hover { background: #f5f5f5; }
+      footer button:active { background: #eee; }
       
-      @media (max-width: 768px) {
-        header.desktop { display: none !important; }
-        footer.mobile { display: block; }
-        .canvas-wrap { padding-bottom: 45px; }
+      /* Options dropdown */
+      .options-wrap {
+        position: relative;
       }
+      .options-dropdown {
+        display: none;
+        position: absolute;
+        bottom: 100%;
+        right: 0;
+        margin-bottom: 4px;
+        background: #fff;
+        border: 1px solid #000;
+        min-width: 120px;
+      }
+      .options-dropdown.open { display: block; }
+      .options-dropdown button {
+        display: block;
+        width: 100%;
+        padding: 8px 12px;
+        background: none;
+        border: none;
+        border-bottom: 1px solid #eee;
+        font: inherit;
+        text-align: left;
+        cursor: pointer;
+      }
+      .options-dropdown button:last-child { border-bottom: none; }
+      .options-dropdown button:hover { background: #f5f5f5; }
     </style>
   </head>
   <body>
-    <div class="wrap">
-      <header class="desktop">
-        <h1>Outfit Generator</h1>
-        <div class="controls">
-          <button id="jacket">Jacket: OFF</button>
+    <!-- Hamburger Menu -->
+    <div class="menu">
+      <button class="menu-btn" id="menu-toggle">[≡]</button>
+      <div class="menu-dropdown" id="menu-dropdown">
+        <div class="username" id="menu-user">@loading...</div>
+        <a href="upload.html">[WARDROBE]</a>
+        <button id="menu-logout">[LOGOUT]</button>
+      </div>
+    </div>
+    
+    <!-- Canvas -->
+    <div class="canvas-wrap">
+      <canvas id="c"></canvas>
+      <div id="empty-state" class="hidden">
+        <p>your closet is empty</p>
+        <a href="upload.html">[upload clothes]</a>
+      </div>
+    </div>
+    
+    <!-- Footer Controls -->
+    <footer>
+      <button id="remix">[REMIX]</button>
+      <button id="save">[SALVA]</button>
+      <div class="options-wrap">
+        <button id="options-toggle">[OPZIONI ▴]</button>
+        <div class="options-dropdown" id="options-dropdown">
+          <button id="jacket">J: OFF</button>
           <button id="edc">EDC: OFF</button>
-          <button id="remix">Remix</button>
-          <button id="download">Save</button>
-          <div id="user-menu"></div>
-        </div>
-      </header>
-      <div class="canvas-wrap">
-        <canvas id="c"></canvas>
-        <div id="empty-state" class="hidden">
-          <h2>Your Closet is Empty</h2>
-          <p>Upload your clothes to start generating personalized outfits!</p>
-          <a href="upload.html">Upload Your First Item</a>
         </div>
       </div>
-      <footer class="mobile">
-        <a href="#" id="jacket-mobile">J: OFF</a>
-        <a href="#" id="edc-mobile">EDC: OFF</a>
-        <a href="#" id="remix-mobile">REMIX</a>
-        <a href="#" id="save-mobile">SAVE</a>
-      </footer>
-    </div>
+    </footer>
+    
     <script type="module" src="main.js"></script>
   </body>
 </html>
-
-
-
