@@ -536,6 +536,19 @@ function draw(sel, canvas) {
     const img = imgForCategory(c.category);
     if (!img) {
       console.warn(`Missing image for category: ${c.category}`);
+      // Draw empty box to show something is missing
+      ctx.save();
+      ctx.strokeStyle = '#ddd';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(c.x, c.y, c.s, c.s);
+      ctx.fillStyle = '#f5f5f5';
+      ctx.fillRect(c.x, c.y, c.s, c.s);
+      ctx.fillStyle = '#999';
+      ctx.font = `${Math.round(c.s * 0.08)}px monospace`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`[no ${c.category}]`, c.x + c.s/2, c.y + c.s/2);
+      ctx.restore();
       continue;
     }
     const iw = img.naturalWidth;
@@ -808,8 +821,8 @@ function hookup() {
     if (sel.images.top_overshirt) {
       positions.push({
         img: sel.images.top_overshirt,
-        x: sel.outerwear ? padding + baseSize * 0.8 : padding + baseSize * 0.3,
-        y: sel.outerwear ? padding + baseSize * 0.4 : padding + baseSize * 0.2,
+        x: sel.images.outerwear ? padding + baseSize * 0.8 : padding + baseSize * 0.3,
+        y: sel.images.outerwear ? padding + baseSize * 0.4 : padding + baseSize * 0.2,
         scale: 1.1
       });
     }
@@ -825,9 +838,9 @@ function hookup() {
     }
     
     // Pants - center-bottom, partially overlapping top
-    if (sel.images.pants) {
+    if (sel.images.bottom) {
       positions.push({
-        img: sel.images.pants,
+        img: sel.images.bottom,
         x: targetWidth / 2 - baseSize * 0.5,
         y: targetHeight - baseSize * 1.6 - padding,
         scale: 1.2
