@@ -21,20 +21,23 @@
       margin-bottom: 30px;
       text-align: center;
     }
-    .upload-area {
-      border: 1px solid #000;
-      padding: 20px;
-      margin-bottom: 20px;
-    }
-    p { margin-bottom: 12px; color: #666; }
-    .file-input {
-      margin: 20px 0;
-      padding: 30px;
-      border: 1px dashed #000;
-      text-align: center;
-      cursor: pointer;
-    }
-    .file-input:hover { background: #f5f5f5; }
+      .upload-area {
+        border: 1px solid #ddd;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+      p { margin-bottom: 12px; color: #666; }
+      .file-input {
+        margin: 20px 0;
+        padding: 30px;
+        border: 1px dashed #ccc;
+        text-align: center;
+        cursor: pointer;
+      }
+      .file-input:hover { 
+        background: #f5f5f5;
+        border-color: #999;
+      }
     .file-input input { display: none; }
     button {
       padding: 10px 16px;
@@ -61,24 +64,24 @@
       width: 0%;
       transition: width 0.3s;
     }
-    .status {
-      margin-top: 16px;
-      padding: 10px;
-      border: 1px solid #000;
-      display: none;
-    }
-    .status.success { background: #efe; }
-    .status.error { background: #fee; }
-    .status.info { background: #eff; }
-    .log {
-      margin-top: 20px;
-      border: 1px solid #000;
-      padding: 16px;
-      max-height: 400px;
-      overflow-y: auto;
-      font-size: 10px;
-      line-height: 1.5;
-    }
+      .status {
+        margin-top: 16px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        display: none;
+      }
+      .status.success { background: #efe; }
+      .status.error { background: #fee; }
+      .status.info { background: #eff; }
+      .log {
+        margin-top: 20px;
+        border: 1px solid #ddd;
+        padding: 16px;
+        max-height: 400px;
+        overflow-y: auto;
+        font-size: 10px;
+        line-height: 1.5;
+      }
     .log-entry { margin: 4px 0; }
     .log-entry.success { color: #070; }
     .log-entry.error { color: #c00; }
