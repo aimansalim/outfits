@@ -399,12 +399,21 @@ function generateOutfit(pools, rng) {
 
   // Fallback: ensure at least one per category without violating main rules
   const fallback = {
-    top_base: sel.top_base || pools.top_base[0] || null,
-    top_overshirt: sel.top_overshirt || pools.top_overshirt[0] || null,
-    outerwear: state.includeJacket ? (sel.outerwear || pools.outerwear[0] || null) : null,
-    bottom: sel.bottom || pools.bottom[0] || null,
-    shoes: sel.shoes || pools.shoes[0] || null,
+    top_base: sel.top_base || pools.top_base_tee?.[0] || pools.top_base?.[0] || null,
+    top_overshirt: sel.top_overshirt || pools.top_overshirt?.[0] || null,
+    outerwear: state.includeJacket ? (sel.outerwear || pools.outerwear?.[0] || null) : null,
+    bottom: sel.bottom || pools.bottom?.[0] || null,
+    shoes: sel.shoes || pools.shoes?.[0] || null,
   };
+  
+  console.log('Generated outfit (before validation):', {
+    top_base: fallback.top_base?.name || 'null',
+    top_overshirt: fallback.top_overshirt?.name || 'null',
+    outerwear: fallback.outerwear?.name || 'null',
+    bottom: fallback.bottom?.name || 'null',
+    shoes: fallback.shoes?.name || 'null'
+  });
+  
   if (validCombo(fallback)) return fallback;
   // Last resort: drop outerwear
   fallback.outerwear = null;
@@ -525,6 +534,10 @@ function draw(sel, canvas) {
   }
   for (const c of cells) {
     const img = imgForCategory(c.category);
+    if (!img) {
+      console.warn(`Missing image for category: ${c.category}`);
+      continue;
+    }
     const iw = img.naturalWidth;
     const ih = img.naturalHeight;
     const scale = Math.min(c.s / iw, c.s / ih);
