@@ -458,56 +458,48 @@ function draw(sel, canvas) {
     state.arrowHitboxes.push({rect: {x: Math.floor(rightX - hitWR / 2), y: Math.floor(midY - hitH / 2), w: hitWR, h: hitH}, category: c.category, dir: +1});
   }
   
-  // Draw EDC items if enabled
+  // Draw EDC items if enabled - BIGGER AND IN BOTTOM RIGHT CORNER
   if (state.includeEDC && sel.edcImages && sel.edcImages.length > 0) {
     console.log('Drawing EDC items:', sel.edcImages.length);
     const S = cells.length > 0 ? cells[0].s : 100;
-    const edcSize = Math.floor(S * 0.35); // EDC items are smaller
-    let bagOffsetX = 0;
-    let wearableOffsetY = 0;
+    const edcSize = Math.floor(S * 0.5); // Make EDC items bigger (was 0.35)
+    
+    // Position all EDC items in bottom right corner as a grid
+    const startX = Math.floor(W * 0.75);
+    const startY = Math.floor(H * 0.7);
+    const spacing = 10 * DPR;
+    let offsetX = 0;
+    let offsetY = 0;
+    let maxHeightInRow = 0;
     
     for (const { img, item } of sel.edcImages) {
+      // Skip bag-item (they're inside bags)
+      if (item.position === 'bag-item') continue;
+      
       const iw = img.naturalWidth;
       const ih = img.naturalHeight;
       const scale = Math.min(edcSize / iw, edcSize / ih);
       const dw = Math.floor(iw * scale);
       const dh = Math.floor(ih * scale);
       
-      let edcX, edcY;
-      
-      // Position based on item position hint
-      if (item.position === 'bag' || item.category === 'bag') {
-        // Bottom left area
-        edcX = Math.floor(W * 0.08 + bagOffsetX);
-        edcY = Math.floor(H * 0.75);
-        bagOffsetX += dw + 10 * DPR;
-      } else if (item.position === 'wrist' || item.category === 'wearable') {
-        // Top right area
-        edcX = Math.floor(W * 0.8);
-        edcY = Math.floor(H * 0.12 + wearableOffsetY);
-        wearableOffsetY += dh + 8 * DPR;
-      } else if (item.position === 'bike' || item.category === 'sport') {
-        // Bottom right
-        edcX = Math.floor(W * 0.75);
-        edcY = Math.floor(H * 0.80);
-      } else if (item.position === 'hand') {
-        // Middle right
-        edcX = Math.floor(W * 0.78);
-        edcY = Math.floor(H * 0.45);
-      } else if (item.position === 'bag-item') {
-        // Skip bag items, they're implied to be inside the bag
-        continue;
-      } else {
-        // pocket or other - bottom middle/right
-        edcX = Math.floor(W * 0.6 + (Math.random() * 0.15 * W));
-        edcY = Math.floor(H * 0.82);
+      // If item would go off screen, move to next row
+      if (startX + offsetX + dw > W - 20 * DPR) {
+        offsetX = 0;
+        offsetY += maxHeightInRow + spacing;
+        maxHeightInRow = 0;
       }
       
-      // Draw with slight transparency to not overpower outfit
+      const edcX = startX + offsetX;
+      const edcY = startY + offsetY;
+      
+      // Draw with full opacity
       ctx.save();
-      ctx.globalAlpha = 0.85;
-      ctx.drawImage(img, edcX - Math.floor(dw/2), edcY - Math.floor(dh/2), dw, dh);
+      ctx.globalAlpha = 0.9;
+      ctx.drawImage(img, edcX, edcY, dw, dh);
       ctx.restore();
+      
+      offsetX += dw + spacing;
+      maxHeightInRow = Math.max(maxHeightInRow, dh);
     }
   }
   
@@ -633,46 +625,42 @@ function hookup() {
       ctx.drawImage(img, dx, dy, dw, dh);
     }
     
-    // Draw EDC items if enabled
+    // Draw EDC items if enabled - BIGGER AND IN BOTTOM RIGHT CORNER
     if (state.includeEDC && sel.edcImages && sel.edcImages.length > 0) {
-      const edcSize = Math.floor(S * 0.35);
-      let bagOffsetX = 0;
-      let wearableOffsetY = 0;
+      const edcSize = Math.floor(S * 0.5);
+      
+      const startX = Math.floor(targetWidth * 0.75);
+      const startY = Math.floor(targetHeight * 0.7);
+      const spacing = 10;
+      let offsetX = 0;
+      let offsetY = 0;
+      let maxHeightInRow = 0;
       
       for (const { img, item } of sel.edcImages) {
+        if (item.position === 'bag-item') continue;
+        
         const iw = img.naturalWidth;
         const ih = img.naturalHeight;
         const scale = Math.min(edcSize / iw, edcSize / ih);
         const dw = Math.floor(iw * scale);
         const dh = Math.floor(ih * scale);
         
-        let edcX, edcY;
-        
-        if (item.position === 'bag' || item.category === 'bag') {
-          edcX = Math.floor(targetWidth * 0.08 + bagOffsetX);
-          edcY = Math.floor(targetHeight * 0.75);
-          bagOffsetX += dw + 10;
-        } else if (item.position === 'wrist' || item.category === 'wearable') {
-          edcX = Math.floor(targetWidth * 0.8);
-          edcY = Math.floor(targetHeight * 0.12 + wearableOffsetY);
-          wearableOffsetY += dh + 8;
-        } else if (item.position === 'bike' || item.category === 'sport') {
-          edcX = Math.floor(targetWidth * 0.75);
-          edcY = Math.floor(targetHeight * 0.80);
-        } else if (item.position === 'hand') {
-          edcX = Math.floor(targetWidth * 0.78);
-          edcY = Math.floor(targetHeight * 0.45);
-        } else if (item.position === 'bag-item') {
-          continue;
-        } else {
-          edcX = Math.floor(targetWidth * 0.6 + (Math.random() * 0.15 * targetWidth));
-          edcY = Math.floor(targetHeight * 0.82);
+        if (startX + offsetX + dw > targetWidth - 20) {
+          offsetX = 0;
+          offsetY += maxHeightInRow + spacing;
+          maxHeightInRow = 0;
         }
         
+        const edcX = startX + offsetX;
+        const edcY = startY + offsetY;
+        
         ctx.save();
-        ctx.globalAlpha = 0.85;
-        ctx.drawImage(img, edcX - Math.floor(dw/2), edcY - Math.floor(dh/2), dw, dh);
+        ctx.globalAlpha = 0.9;
+        ctx.drawImage(img, edcX, edcY, dw, dh);
         ctx.restore();
+        
+        offsetX += dw + spacing;
+        maxHeightInRow = Math.max(maxHeightInRow, dh);
       }
     }
     
@@ -724,11 +712,28 @@ function hookup() {
   });
 
   window.addEventListener('resize', () => { if (currentSel) draw(currentSel, canvas); });
+  
   // Click to handle arrow interactions
   canvas.addEventListener('click', async (e) => {
     const rect = canvas.getBoundingClientRect();
     const x = Math.floor((e.clientX - rect.left) * DPR);
     const y = Math.floor((e.clientY - rect.top) * DPR);
+    
+    // On mobile, check if click is on left or right half of an item cell
+    const isMobile = window.innerWidth <= 768;
+    if (isMobile && state.lastCells) {
+      for (const c of state.lastCells) {
+        // Check if click is within cell bounds
+        if (x >= c.x && x <= c.x + c.s && y >= c.y && y <= c.y + c.s) {
+          const cellCenterX = c.x + c.s / 2;
+          const dir = x < cellCenterX ? -1 : 1;
+          await cycleCategory(c.category, dir);
+          return;
+        }
+      }
+    }
+    
+    // Desktop: use arrow hitboxes
     const hit = (state.arrowHitboxes || []).find(h => x >= h.rect.x && x <= h.rect.x + h.rect.w && y >= h.rect.y && y <= h.rect.y + h.rect.h);
     if (!hit || !currentSel) return;
     await cycleCategory(hit.category, hit.dir);
@@ -742,6 +747,13 @@ function hookup() {
   await loadEDCPairings();
   hookup();
   await regenerate('create');
+  
+  // Hide loading screen
+  const loading = document.getElementById('loading');
+  if (loading) {
+    loading.classList.add('hide');
+    setTimeout(() => loading.remove(), 300);
+  }
 })();
 
 // Image cache for quick swapping
@@ -770,9 +782,12 @@ async function cycleCategory(category, dir) {
   if (!arr.length) return;
   const currentId = sel[category]?.id;
   let idx = Math.max(0, arr.findIndex(x => x.id === currentId));
-  for (let step = 1; step <= arr.length; step++) {
-    const nextIdx = (idx + (dir > 0 ? step : -step) + arr.length) % arr.length;
-    const candidate = arr[nextIdx];
+  
+  // Try all items in the array (infinite cycle)
+  let attempts = 0;
+  while (attempts < arr.length * 2) {
+    idx = (idx + dir + arr.length) % arr.length;
+    const candidate = arr[idx];
     const nextSel = {...sel, [category]: candidate};
     if (validCombo(nextSel)) {
       sel[category] = candidate;
@@ -795,6 +810,7 @@ async function cycleCategory(category, dir) {
       try { localStorage.setItem('lastSelected', JSON.stringify(last)); } catch (_) {}
       return;
     }
+    attempts++;
   }
 }
 
