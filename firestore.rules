@@ -1,0 +1,28 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Users collection - users can read/write their own data
+    match /users/{userId} {
+      // Allow read if authenticated
+      allow read: if request.auth != null;
+      
+      // Allow write only to own document
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Usernames collection - for username uniqueness check
+    match /usernames/{username} {
+      // Anyone can read to check if username exists
+      allow read: if true;
+      
+      // Only authenticated users can create their own username
+      allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
+      
+      // Cannot update or delete usernames
+      allow update, delete: if false;
+    }
+  }
+}
+
