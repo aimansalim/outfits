@@ -57,8 +57,9 @@ async function loadEDCPairings() {
     const res = await fetch('edc-pairings.json');
     const data = await res.json();
     state.edcPairings = data;
+    console.log('EDC pairings loaded:', data.length, 'pairings');
   } catch (err) {
-    console.warn('EDC pairings not found:', err);
+    console.error('EDC pairings not found:', err);
     state.edcPairings = [];
   }
 }
@@ -459,6 +460,8 @@ function draw(sel, canvas) {
   
   // Draw EDC items if enabled
   if (state.includeEDC && sel.edcImages && sel.edcImages.length > 0) {
+    console.log('Drawing EDC items:', sel.edcImages.length);
+    const S = cells.length > 0 ? cells[0].s : 100;
     const edcSize = Math.floor(S * 0.35); // EDC items are smaller
     let bagOffsetX = 0;
     let wearableOffsetY = 0;
@@ -525,9 +528,12 @@ async function regenerate(kind) {
   
   // Load EDC if enabled
   if (state.includeEDC) {
+    console.log('EDC is enabled, choosing pairing...');
     const edcPairing = chooseEDCPairing(sel, rng);
+    console.log('Selected EDC pairing:', edcPairing?.name || 'none');
     if (edcPairing) {
       const edcImages = await loadEDCImages(edcPairing);
+      console.log('Loaded EDC images:', edcImages.length);
       sel.edcImages = edcImages;
       state.currentEDC = edcPairing;
     }
