@@ -1,0 +1,408 @@
+[
+  {
+    "name": "White Polo Tee",
+    "category": "top",
+    "file": "/Users/aiman/Biz/Aiman/Coding/outfit-generator/docs/assets/tees/white-polo-tee.png",
+    "colorHints": [
+      "white"
+    ],
+    "styleHints": [
+      "casual"
+    ],
+    "topLayer": "base"
+  },
+  {
+    "name": "Green Polo Tee",
+    "category": "top",
+    "file": "/Users/aiman/Biz/Aiman/Coding/outfit-generator/docs/assets/tees/green-polo-tee.png",
+    "colorHints": [
+      "green"
+    ],
+    "styleHints": [
+      "casual"
+    ],
+    "topLayer": "base"
+  },
+  {
+    "name": "Black Polo Tee Red Horse",
+    "category": "top",
+    "file": "/Users/aiman/Biz/Aiman/Coding/outfit-generator/docs/assets/tees/black-polo-tee-red-horse.png",
+    "colorHints": [
+      "black",
+      "red"
+    ],
+    "styleHints": [
+      "casual"
+    ],
+    "topLayer": "base"
+  },
+  {
+    "name": "White Moncler Tee",
+    "category": "top",
+    "file": "/Users/aiman/Biz/Aiman/Coding/outfit-generator/docs/assets/tees/white-moncler-tee.png",
+    "colorHints": [
+      "white"
+    ],
+    "styleHints": [
+      "casual"
+    ],
+    "topLayer": "base"
+  },
+  {
+    "name": "White Wide Tee",
+    "category": "top",
+    "file": "/Users/aiman/Biz/Aiman/Coding/outfit-generator/docs/assets/tees/white-wide-tee.png",
+    "colorHints": [
+      "white"
+    ],
+    "styleHints": [
+      "casual"
+    ],
+    "topLayer": "base"
+  },
+  {
+    "name": "Navy Polo Tee Red Horse",
+    "category": "top",
+    "file": "/Users/aiman/Biz/Aiman/Coding/outfit-generator/docs/assets/tees/navy-polo-tee-red-horse.png",
+    "colorHints": [
+      "navy",
+      "red"
+    ],
+    "styleHints": [
+      "casual"
+    ],
+    "topLayer": "base"
+  },
+  {
+    "name": "Button Up White",
+    "category": "top",
+    "file": "/Users/aiman/Biz/Aiman/Coding/outfit-generator/docs/assets/midlayer/button-up-white.png",
+    "colorHints": [
+      "white"
+    ],
+    "styleHints": [
+      "casual"
+    ],
+    "topLayer": "overshirt"
+  },
+  {
+    "name": "Beige Zip Hoodie",
+    "category": "top",
+    "file": "/Users/aiman/Biz/Aiman/Coding/outfit-generator/docs/assets/midlayer/beige-zip-hoodie.png",
+    "colorHints": [
+      "beige"
+    ],
+    "styleHints": [
+      "street"
+    ],
+    "topLayer": "overshirt"
+  },
+  {
+    "name": "Black Nike Hoodie",
+    "category": "top",
+    "file": "/Users/aiman/Biz/Aiman/Coding/outfit-generator/docs/assets/midlayer/black-nike-hoodie.png",
+    "colorHints": [
+      "black"
+    ],
+    "styleHints": [
+      "sport",
+      "street"
+    ],
+    "topLayer": "overshirt"
+  },
+  {
+    "name": "Military Green Armani Button Up",
+    "category": "top",
+    "file": "/Users/aiman/Biz/Aiman/Coding/outfit-generator/docs/assets/midlayer/military-green-armani-button-up.png",
+    "colorHints": [
+      "green"
+    ],
+    "styleHints": [
+      "casual"
+    ],
+    "topLayer": "overshirt"
+  },
+  {
+    "name": "Beige Polo Crewneck",
+    "category": "top",
+    "file": "/Users/aiman/Biz/Aiman/Coding/outfit-generator/docs/assets/midlayer/beige-polo-crewneck.png",
+    "colorHints": [
+      "beige"
+    ],
+    "styleHints": [
+      "casual"
+    ],
+    "topLayer": "overshirt"
+  },
+  {
+    "name": "Green Polo Longsleeve",
+    "category": "top",
+    "file": "/Users/aiman/Biz/Aiman/Coding/outfit-generator/docs/assets/midlayer/green-polo-longsleeve.png",
+    "colorHints": [
+      "green"
+    ],
+    "styleHints": [
+      "casual"
+    ],
+    "topLayer": "overshirt"
+  },
+  {
+    "name": "Black Hoodie Zip",
+    "category": "top",
+    "file": "/Users/aiman/Biz/Aiman/Coding/outfit-generator/docs/assets/midlayer/black-hoodie-zip.png",
+    "colorHints": [
+      "black"
+    ],
+    "styleHints": [
+      "street"
+    ],
+    "topLayer": "overshirt"
+  },
+  {
+    "name": "Blue Navy Full Zip",
+    "category": "top",
+    "file": "/Users/aiman/Biz/Aiman/Coding/outfit-generator/docs/assets/midlayer/blue-navy-full-zip.png",
+    "colorHints": [
+      "navy",
+      "blue"
+    ],
+    "styleHints": [
+      "casual"
+    ],
+    "topLayer": "overshirt"
+  },
+  {
+    "name": "Black Half Button Long Sleeve",
+    "category": "top",
+    "file": "/Users/aiman/Biz/Aiman/Coding/outfit-generator/docs/assets/midlayer/black-half-button-long-sleeve.png",
+    "colorHints": [
+      "black"
+    ],
+    "styleHints": [
+      "casual"
+    ],
+    "topLayer": "overshirt"
+  },
+  {
+    "name": "Button Up Navy",
+    "category": "top",
+    "file": "/Users/aiman/Biz/Aiman/Coding/outfit-generator/docs/assets/midlayer/button-up-navy.png",
+    "colorHints": [
+      "navy"
+    ],
+    "styleHints": [
+      "casual"
+    ],
+    "topLayer": "overshirt"
+  },
+  {
+    "name": "Green Linen Button Up",
+    "category": "top",
+    "file": "/Users/aiman/Biz/Aiman/Coding/outfit-generator/docs/assets/midlayer/green-linen-button-up.png",
+    "colorHints": [
+      "green"
+    ],
+    "styleHints": [
+      "casual"
+    ],
+    "topLayer": "overshirt"
+  },
+  {
+    "name": "Black Montone",
+    "category": "jacket",
+    "file": "/Users/aiman/Biz/Aiman/Coding/outfit-generator/docs/assets/jackets/black-montone.png",
+    "colorHints": [
+      "black"
+    ],
+    "styleHints": [
+      "casual"
+    ]
+  },
+  {
+    "name": "Black Parka Waterproof",
+    "category": "jacket",
+    "file": "/Users/aiman/Biz/Aiman/Coding/outfit-generator/docs/assets/jackets/black-parka-waterproof.png",
+    "colorHints": [
+      "black"
+    ],
+    "styleHints": [
+      "casual"
+    ]
+  },
+  {
+    "name": "Navy Linen Pants",
+    "category": "pants",
+    "file": "/Users/aiman/Biz/Aiman/Coding/outfit-generator/docs/assets/pants/navy-linen-pants.png",
+    "colorHints": [
+      "navy"
+    ],
+    "styleHints": [
+      "casual"
+    ]
+  },
+  {
+    "name": "Black Nike Soft Pants",
+    "category": "pants",
+    "file": "/Users/aiman/Biz/Aiman/Coding/outfit-generator/docs/assets/pants/black-nike-soft-pants.png",
+    "colorHints": [
+      "black"
+    ],
+    "styleHints": [
+      "sport"
+    ]
+  },
+  {
+    "name": "Black Linen Pants",
+    "category": "pants",
+    "file": "/Users/aiman/Biz/Aiman/Coding/outfit-generator/docs/assets/pants/black-linen-pants.png",
+    "colorHints": [
+      "black"
+    ],
+    "styleHints": [
+      "casual"
+    ]
+  },
+  {
+    "name": "Green Linen Pants",
+    "category": "pants",
+    "file": "/Users/aiman/Biz/Aiman/Coding/outfit-generator/docs/assets/pants/green-linen-pants.png",
+    "colorHints": [
+      "green"
+    ],
+    "styleHints": [
+      "casual"
+    ]
+  },
+  {
+    "name": "Black Cotton Pants",
+    "category": "pants",
+    "file": "/Users/aiman/Biz/Aiman/Coding/outfit-generator/docs/assets/pants/black-cotton-pants.png",
+    "colorHints": [
+      "black"
+    ],
+    "styleHints": [
+      "casual"
+    ]
+  },
+  {
+    "name": "Grey Linen Pants",
+    "category": "pants",
+    "file": "/Users/aiman/Biz/Aiman/Coding/outfit-generator/docs/assets/pants/grey-linen-pants.png",
+    "colorHints": [
+      "grey"
+    ],
+    "styleHints": [
+      "casual"
+    ]
+  },
+  {
+    "name": "Adidas Samba White Green",
+    "category": "shoes",
+    "file": "/Users/aiman/Biz/Aiman/Coding/outfit-generator/docs/assets/shoes/adidas-samba-white-green.png",
+    "colorHints": [
+      "white",
+      "green"
+    ],
+    "styleHints": [
+      "sport"
+    ]
+  },
+  {
+    "name": "Brown Chelsea Boots",
+    "category": "shoes",
+    "file": "/Users/aiman/Biz/Aiman/Coding/outfit-generator/docs/assets/shoes/brown-chelsea-boots.png",
+    "colorHints": [
+      "brown"
+    ],
+    "styleHints": [
+      "casual"
+    ]
+  },
+  {
+    "name": "Salomon Xt 4 Og",
+    "category": "shoes",
+    "file": "/Users/aiman/Biz/Aiman/Coding/outfit-generator/docs/assets/shoes/salomon-xt-4-og.png",
+    "colorHints": [],
+    "styleHints": [
+      "casual"
+    ]
+  },
+  {
+    "name": "Golden Goose Nere",
+    "category": "shoes",
+    "file": "/Users/aiman/Biz/Aiman/Coding/outfit-generator/docs/assets/shoes/golden-goose-nere.png",
+    "colorHints": [
+      "beige"
+    ],
+    "styleHints": [
+      "casual"
+    ]
+  },
+  {
+    "name": "Adidas Samba White Bordeaux",
+    "category": "shoes",
+    "file": "/Users/aiman/Biz/Aiman/Coding/outfit-generator/docs/assets/shoes/adidas-samba-white-bordeaux.png",
+    "colorHints": [
+      "white",
+      "red"
+    ],
+    "styleHints": [
+      "sport"
+    ]
+  },
+  {
+    "name": "Black Chelsea Boots",
+    "category": "shoes",
+    "file": "/Users/aiman/Biz/Aiman/Coding/outfit-generator/docs/assets/shoes/black-chelsea-boots.png",
+    "colorHints": [
+      "black"
+    ],
+    "styleHints": [
+      "casual"
+    ]
+  },
+  {
+    "name": "Golden Goose Bianche Verdi",
+    "category": "shoes",
+    "file": "/Users/aiman/Biz/Aiman/Coding/outfit-generator/docs/assets/shoes/golden-goose-bianche-verdi.png",
+    "colorHints": [
+      "beige"
+    ],
+    "styleHints": [
+      "casual"
+    ]
+  },
+  {
+    "name": "Mocassino Beige",
+    "category": "shoes",
+    "file": "/Users/aiman/Biz/Aiman/Coding/outfit-generator/docs/assets/shoes/mocassino-beige.png",
+    "colorHints": [
+      "beige"
+    ],
+    "styleHints": [
+      "casual"
+    ]
+  },
+  {
+    "name": "New Balance White",
+    "category": "shoes",
+    "file": "/Users/aiman/Biz/Aiman/Coding/outfit-generator/docs/assets/shoes/new-balance-white.png",
+    "colorHints": [
+      "white"
+    ],
+    "styleHints": [
+      "casual"
+    ]
+  },
+  {
+    "name": "New Balance Large Sole Military Green",
+    "category": "shoes",
+    "file": "/Users/aiman/Biz/Aiman/Coding/outfit-generator/docs/assets/shoes/new-balance-large-sole-military-green.png",
+    "colorHints": [
+      "green"
+    ],
+    "styleHints": [
+      "casual"
+    ]
+  }
+]
