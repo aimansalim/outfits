@@ -451,9 +451,36 @@ function hookup() {
 
   function doSave(e) {
     e.preventDefault();
+    // Create a temporary canvas with 9:16 aspect ratio
+    const tempCanvas = document.createElement('canvas');
+    const targetWidth = 1080;
+    const targetHeight = 1920;
+    tempCanvas.width = targetWidth;
+    tempCanvas.height = targetHeight;
+    
+    // Render the current outfit on the temp canvas
+    const ctx = tempCanvas.getContext('2d');
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, targetWidth, targetHeight);
+    
+    const cells = layoutSquares(targetWidth, targetHeight, !!currentSel.outerwear);
+    for (const c of cells) {
+      const img = currentSel.images[c.category] || (c.category === 'top_base' ? currentSel.images.top_base : 
+                   c.category === 'top_overshirt' ? currentSel.images.top_overshirt : null);
+      if (!img) continue;
+      const iw = img.naturalWidth;
+      const ih = img.naturalHeight;
+      const scale = Math.min(c.s / iw, c.s / ih);
+      const dw = Math.floor(iw * scale);
+      const dh = Math.floor(ih * scale);
+      const dx = Math.floor(c.x + (c.s - dw) / 2);
+      const dy = Math.floor(c.y + (c.s - dh) / 2);
+      ctx.drawImage(img, dx, dy, dw, dh);
+    }
+    
     const link = document.createElement('a');
     link.download = 'outfit.png';
-    link.href = document.getElementById('c').toDataURL('image/png');
+    link.href = tempCanvas.toDataURL('image/png');
     link.click();
   }
 
@@ -470,13 +497,39 @@ function hookup() {
   save15.addEventListener('click', async (e) => {
     e.preventDefault();
     // Generate and download 15 deterministic outfits that pass constraints
-    const canvas = document.getElementById('c');
     const startSeed = state.seed;
     for (let i = 0; i < 15; i++) {
       await regenerate('remix');
+      
+      // Create temp canvas with 9:16 aspect ratio
+      const tempCanvas = document.createElement('canvas');
+      const targetWidth = 1080;
+      const targetHeight = 1920;
+      tempCanvas.width = targetWidth;
+      tempCanvas.height = targetHeight;
+      
+      const ctx = tempCanvas.getContext('2d');
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, targetWidth, targetHeight);
+      
+      const cells = layoutSquares(targetWidth, targetHeight, !!currentSel.outerwear);
+      for (const c of cells) {
+        const img = currentSel.images[c.category] || (c.category === 'top_base' ? currentSel.images.top_base : 
+                     c.category === 'top_overshirt' ? currentSel.images.top_overshirt : null);
+        if (!img) continue;
+        const iw = img.naturalWidth;
+        const ih = img.naturalHeight;
+        const scale = Math.min(c.s / iw, c.s / ih);
+        const dw = Math.floor(iw * scale);
+        const dh = Math.floor(ih * scale);
+        const dx = Math.floor(c.x + (c.s - dw) / 2);
+        const dy = Math.floor(c.y + (c.s - dh) / 2);
+        ctx.drawImage(img, dx, dy, dw, dh);
+      }
+      
       const link = document.createElement('a');
       link.download = `outfit-${String(i+1).padStart(2,'0')}.png`;
-      link.href = canvas.toDataURL('image/png');
+      link.href = tempCanvas.toDataURL('image/png');
       link.click();
     }
     // restore seed base if desired
