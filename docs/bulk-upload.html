@@ -1,56 +1,58 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bulk Upload - Outfit Generator</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>bulk upload</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      font: 11px/1.4 'Monaco', 'Menlo', 'Consolas', monospace;
+      background: #fff;
+      color: #000;
+      letter-spacing: 0.3px;
       padding: 40px 20px;
-      max-width: 1200px;
+      max-width: 900px;
       margin: 0 auto;
-      background: #f5f5f5;
     }
-    h1 { margin-bottom: 30px; }
-    .upload-area {
-      background: white;
-      padding: 40px;
-      border-radius: 8px;
+    h1 {
+      font-size: 14px;
+      font-weight: normal;
       margin-bottom: 30px;
+      text-align: center;
     }
+    .upload-area {
+      border: 1px solid #000;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    p { margin-bottom: 12px; color: #666; }
     .file-input {
       margin: 20px 0;
-      padding: 20px;
-      border: 2px dashed #ccc;
-      border-radius: 8px;
+      padding: 30px;
+      border: 1px dashed #000;
       text-align: center;
       cursor: pointer;
-      transition: all 0.3s;
     }
-    .file-input:hover { border-color: #000; background: #fafafa; }
+    .file-input:hover { background: #f5f5f5; }
     .file-input input { display: none; }
     button {
+      padding: 10px 16px;
       background: #000;
-      color: white;
+      color: #fff;
       border: none;
-      padding: 12px 24px;
-      font-size: 14px;
+      font: inherit;
       cursor: pointer;
-      border-radius: 4px;
-      font-family: inherit;
     }
+    button:hover { background: #333; }
     button:disabled {
-      background: #ccc;
+      opacity: 0.4;
       cursor: not-allowed;
     }
     .progress {
-      margin: 20px 0;
+      margin: 16px 0;
       background: #f0f0f0;
-      height: 8px;
-      border-radius: 4px;
-      overflow: hidden;
+      height: 2px;
       display: none;
     }
     .progress-bar {
@@ -60,86 +62,43 @@
       transition: width 0.3s;
     }
     .status {
-      margin-top: 20px;
-      padding: 15px;
-      border-radius: 4px;
+      margin-top: 16px;
+      padding: 10px;
+      border: 1px solid #000;
       display: none;
     }
-    .status.success { background: #d4edda; color: #155724; }
-    .status.error { background: #f8d7da; color: #721c24; }
-    .status.info { background: #d1ecf1; color: #0c5460; }
+    .status.success { background: #efe; }
+    .status.error { background: #fee; }
+    .status.info { background: #eff; }
     .log {
       margin-top: 20px;
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
+      border: 1px solid #000;
+      padding: 16px;
       max-height: 400px;
       overflow-y: auto;
-      font-family: monospace;
-      font-size: 12px;
-      line-height: 1.6;
+      font-size: 10px;
+      line-height: 1.5;
     }
-    .log-entry { margin: 5px 0; }
-    .log-entry.success { color: #155724; }
-    .log-entry.error { color: #721c24; }
-    .log-entry.info { color: #0c5460; }
-    .preview-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-      gap: 10px;
-      margin-top: 20px;
-      max-height: 300px;
-      overflow-y: auto;
-      background: #f9f9f9;
-      padding: 10px;
-      border-radius: 4px;
-      display: none;
-    }
-    .preview-item {
-      position: relative;
-      aspect-ratio: 1;
-      border-radius: 4px;
-      overflow: hidden;
-      background: white;
-    }
-    .preview-item img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-    }
-    .preview-item .label {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: rgba(0,0,0,0.7);
-      color: white;
-      font-size: 9px;
-      padding: 2px 4px;
-      text-align: center;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+    .log-entry { margin: 4px 0; }
+    .log-entry.success { color: #070; }
+    .log-entry.error { color: #c00; }
+    .log-entry.info { color: #666; }
   </style>
 </head>
 <body>
-  <h1>🚀 Bulk Upload Existing Clothes</h1>
+  <h1>[bulk upload]</h1>
   
   <div class="upload-area">
-    <p>Select all your existing clothing images to upload to Firebase.</p>
-    <p style="margin-top: 10px; color: #666; font-size: 14px;">
-      The script will auto-detect categories, colors, and styles from folder names and filenames.
-    </p>
+    <p>select your entire clothing folder to upload all items at once</p>
+    <p style="color: #999;">automatically filters accessories and detects categories from folder structure</p>
     
     <div class="file-input" onclick="document.getElementById('file-input').click()">
       <input type="file" id="file-input" webkitdirectory directory multiple>
-      <p>📁 Click to select entire folder</p>
-      <p style="margin-top: 10px; color: #999; font-size: 12px;">Select: /Users/aiman/Downloads/HIGH-QUALITY-NO-BG</p>
-      <p id="file-count" style="margin-top: 10px; color: #666; font-size: 14px;"></p>
+      <p>[click to select folder]</p>
+      <p id="file-count" style="margin-top: 10px; color: #666;"></p>
     </div>
     
-    <button id="upload-btn" disabled>Upload All Items</button>
+    <button id="upload-btn" disabled>[upload all items]</button>
     
     <div class="progress" id="progress">
       <div class="progress-bar" id="progress-bar"></div>
@@ -153,7 +112,7 @@
   <script type="module">
     import { initFirebase } from './firebase-config.js';
     import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-    import { doc, getDoc, setDoc, arrayUnion } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+    import { doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
     import { ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
 
     let auth, db, storage, currentUser;
@@ -169,7 +128,7 @@
     onAuthStateChanged(auth, (user) => {
       if (user) {
         currentUser = user;
-        log(`✅ Logged in as: ${user.email}`, 'success');
+        log(`logged in: ${user.email}`, 'success');
       } else {
         window.location.href = 'auth.html';
       }
@@ -183,34 +142,27 @@
     fileInput.addEventListener('change', (e) => {
       const allFiles = Array.from(e.target.files);
       
-      // Filter out non-clothing items (accessories, etc.)
       selectedFiles = allFiles.filter(file => {
         const path = (file.webkitRelativePath || file.name).toLowerCase();
         const filename = file.name.toLowerCase();
         
-        // Skip EDC/accessories folders
         if (path.includes('/edc/') || path.includes('/accessories/')) return false;
-        
-        // Skip generated/temp files
         if (filename.includes('generative fill') || filename.includes('generated image')) return false;
-        
-        // Only include image files
         if (!file.type.startsWith('image/')) return false;
         
         return true;
       });
       
-      fileCount.textContent = `${selectedFiles.length} clothing items selected (${allFiles.length} total files)`;
+      fileCount.textContent = `${selectedFiles.length} items selected (${allFiles.length} total files)`;
       uploadBtn.disabled = selectedFiles.length === 0;
-      log(`📁 Selected ${selectedFiles.length} clothing items from ${allFiles.length} total files`, 'info');
+      log(`selected ${selectedFiles.length} items from ${allFiles.length} files`, 'info');
       
-      // Show folder structure summary
       const categories = {};
       selectedFiles.forEach(file => {
         const info = parseItemInfo(file);
         categories[info.category] = (categories[info.category] || 0) + 1;
       });
-      log(`📊 Breakdown: ${Object.entries(categories).map(([cat, count]) => `${cat}: ${count}`).join(', ')}`, 'info');
+      log(`breakdown: ${Object.entries(categories).map(([cat, count]) => `${cat}: ${count}`).join(', ')}`, 'info');
     });
 
     // Parse item info from file path
@@ -219,11 +171,9 @@
       const filename = file.name.toLowerCase();
       const pathLower = path.toLowerCase();
       
-      // Determine category from path or filename
       let category = 'top';
       let topLayer = null;
       
-      // Check folder structure (works for both old assets/ and new HIGH-QUALITY-NO-BG/)
       if (pathLower.includes('/tees/') || pathLower.includes('/t-shirt/') || filename.includes('-tee')) {
         category = 'top';
         topLayer = 'base';
@@ -242,7 +192,6 @@
         category = 'shoes';
       }
       
-      // Extract colors
       const colors = [];
       const colorMap = {
         'black': 'black', 'white': 'white', 'navy': 'navy',
@@ -258,7 +207,6 @@
         }
       }
       
-      // Extract styles
       const styles = [];
       if (filename.includes('polo') || filename.includes('button')) {
         styles.push('casual');
@@ -271,7 +219,6 @@
       }
       if (!styles.length) styles.push('casual');
       
-      // Generate name
       const name = file.name.replace(/\.(png|jpg|jpeg)$/i, '').replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
       
       return { category, topLayer, colors, styles, name };
@@ -311,23 +258,19 @@
     // Upload single item
     async function uploadItem(file, index, total) {
       const info = parseItemInfo(file);
-      log(`[${index + 1}/${total}] Processing: ${info.name} (${info.category})`, 'info');
+      log(`[${index + 1}/${total}] ${info.name} (${info.category})`, 'info');
       
       try {
-        // Compress
-        log(`  → Compressing...`, 'info');
+        log(`  compressing...`, 'info');
         const compressed = await compressImage(file);
-        log(`  → Compressed: ${(file.size / 1024).toFixed(0)}KB → ${(compressed.size / 1024).toFixed(0)}KB`, 'info');
         
-        // Upload to Storage
-        log(`  → Uploading to Firebase Storage...`, 'info');
+        log(`  uploading...`, 'info');
         const fileName = `${currentUser.uid}/${Date.now()}_${index}.jpg`;
         const storageRef = ref(storage, `clothes/${fileName}`);
         await uploadBytes(storageRef, compressed);
         const downloadURL = await getDownloadURL(storageRef);
-        log(`  → Storage URL obtained`, 'info');
         
-        // Create item object
+        log(`  saving...`, 'info');
         const item = {
           id: `${Date.now()}_${index}`,
           name: info.name,
@@ -340,24 +283,19 @@
           uploadedAt: new Date().toISOString()
         };
         
-        // Add to Firestore (use setDoc with merge to handle existing/non-existing docs)
-        log(`  → Saving to Firestore...`, 'info');
         const userRef = doc(db, 'users', currentUser.uid);
-        
-        // Get current user doc
         const userDoc = await getDoc(userRef);
         const currentItems = userDoc.exists() && userDoc.data().items ? userDoc.data().items : [];
         
-        // Add new item
         await setDoc(userRef, {
           items: [...currentItems, item]
         }, { merge: true });
         
-        log(`✅ [${index + 1}/${total}] Uploaded: ${info.name}`, 'success');
+        log(`✓ [${index + 1}/${total}] ${info.name}`, 'success');
         return { success: true, item: info.name };
       } catch (error) {
         console.error('Upload error:', error);
-        log(`❌ [${index + 1}/${total}] Failed: ${info.name} - ${error.message}`, 'error');
+        log(`✗ [${index + 1}/${total}] ${info.name} - ${error.message}`, 'error');
         return { success: false, item: info.name, error: error.message };
       }
     }
@@ -374,10 +312,10 @@
       progressEl.style.display = 'block';
       statusEl.style.display = 'block';
       statusEl.className = 'status info';
-      statusEl.textContent = 'Starting bulk upload...';
+      statusEl.textContent = 'starting bulk upload...';
       
-      log(`🚀 Starting upload of ${selectedFiles.length} items...`, 'info');
-      log(`👤 User: ${currentUser.email} (${currentUser.uid})`, 'info');
+      log(`starting upload of ${selectedFiles.length} items...`, 'info');
+      log(`user: ${currentUser.email} (${currentUser.uid})`, 'info');
       
       const results = [];
       
@@ -385,29 +323,26 @@
         const result = await uploadItem(selectedFiles[i], i, selectedFiles.length);
         results.push(result);
         
-        // Update progress
         const progress = ((i + 1) / selectedFiles.length) * 100;
         progressBar.style.width = `${progress}%`;
-        statusEl.textContent = `Uploading: ${i + 1}/${selectedFiles.length}`;
+        statusEl.textContent = `uploading: ${i + 1}/${selectedFiles.length}`;
         
-        // Small delay to avoid overwhelming Firebase
         if (i < selectedFiles.length - 1) {
           await new Promise(resolve => setTimeout(resolve, 300));
         }
       }
       
-      // Summary
       const successful = results.filter(r => r.success).length;
       const failed = results.filter(r => !r.success).length;
       
       if (failed === 0) {
         statusEl.className = 'status success';
-        statusEl.textContent = `✅ All ${successful} items uploaded successfully!`;
-        log(`\n🎉 COMPLETE! ${successful} items uploaded successfully!`, 'success');
+        statusEl.textContent = `complete! ${successful} items uploaded`;
+        log(`\ncomplete! ${successful} items uploaded`, 'success');
       } else {
         statusEl.className = 'status error';
-        statusEl.textContent = `⚠️ Uploaded ${successful} items, ${failed} failed`;
-        log(`\n⚠️ COMPLETE! ${successful} succeeded, ${failed} failed`, 'error');
+        statusEl.textContent = `uploaded ${successful}, failed ${failed}`;
+        log(`\nfinished: ${successful} succeeded, ${failed} failed`, 'error');
       }
       
       uploadBtn.disabled = false;
@@ -431,4 +366,3 @@
   </script>
 </body>
 </html>
-
