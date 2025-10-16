@@ -95,8 +95,9 @@
     </p>
     
     <div class="file-input" onclick="document.getElementById('file-input').click()">
-      <input type="file" id="file-input" multiple accept="image/*">
-      <p>📁 Click to select images or drag and drop</p>
+      <input type="file" id="file-input" webkitdirectory directory multiple>
+      <p>📁 Click to select entire folder</p>
+      <p style="margin-top: 10px; color: #999; font-size: 12px;">Select: /Users/aiman/Downloads/HIGH-QUALITY-NO-BG</p>
       <p id="file-count" style="margin-top: 10px; color: #666; font-size: 14px;"></p>
     </div>
     
@@ -142,32 +143,64 @@
     const uploadBtn = document.getElementById('upload-btn');
 
     fileInput.addEventListener('change', (e) => {
-      selectedFiles = Array.from(e.target.files);
-      fileCount.textContent = `${selectedFiles.length} files selected`;
+      const allFiles = Array.from(e.target.files);
+      
+      // Filter out non-clothing items (accessories, etc.)
+      selectedFiles = allFiles.filter(file => {
+        const path = (file.webkitRelativePath || file.name).toLowerCase();
+        const filename = file.name.toLowerCase();
+        
+        // Skip EDC/accessories folders
+        if (path.includes('/edc/') || path.includes('/accessories/')) return false;
+        
+        // Skip generated/temp files
+        if (filename.includes('generative fill') || filename.includes('generated image')) return false;
+        
+        // Only include image files
+        if (!file.type.startsWith('image/')) return false;
+        
+        return true;
+      });
+      
+      fileCount.textContent = `${selectedFiles.length} clothing items selected (${allFiles.length} total files)`;
       uploadBtn.disabled = selectedFiles.length === 0;
-      log(`📁 Selected ${selectedFiles.length} files`, 'info');
+      log(`📁 Selected ${selectedFiles.length} clothing items from ${allFiles.length} total files`, 'info');
+      
+      // Show folder structure summary
+      const categories = {};
+      selectedFiles.forEach(file => {
+        const info = parseItemInfo(file);
+        categories[info.category] = (categories[info.category] || 0) + 1;
+      });
+      log(`📊 Breakdown: ${Object.entries(categories).map(([cat, count]) => `${cat}: ${count}`).join(', ')}`, 'info');
     });
 
     // Parse item info from file path
     function parseItemInfo(file) {
       const path = file.webkitRelativePath || file.name;
       const filename = file.name.toLowerCase();
+      const pathLower = path.toLowerCase();
       
       // Determine category from path or filename
       let category = 'top';
       let topLayer = null;
       
-      if (path.includes('/tees/') || filename.includes('tee')) {
+      // Check folder structure (works for both old assets/ and new HIGH-QUALITY-NO-BG/)
+      if (pathLower.includes('/tees/') || pathLower.includes('/t-shirt/') || filename.includes('-tee')) {
         category = 'top';
         topLayer = 'base';
-      } else if (path.includes('/midlayer/') || filename.includes('button-up') || filename.includes('hoodie') || filename.includes('crewneck')) {
+      } else if (pathLower.includes('/midlayer/') || pathLower.includes('/overshirts/') || pathLower.includes('/long-sleeve/') || 
+                 filename.includes('button-up') || filename.includes('hoodie') || filename.includes('crewneck')) {
         category = 'top';
         topLayer = 'overshirt';
-      } else if (path.includes('/jackets/') || filename.includes('jacket') || filename.includes('parka') || filename.includes('montone')) {
+      } else if (pathLower.includes('/jackets/') || pathLower.includes('/outerwear/') ||
+                 filename.includes('jacket') || filename.includes('parka') || filename.includes('montone')) {
         category = 'jacket';
-      } else if (path.includes('/pants/')) {
+      } else if (pathLower.includes('/pants/') || pathLower.includes('/trousers/') || pathLower.includes('/bottoms/')) {
         category = 'pants';
-      } else if (path.includes('/shoes/') || filename.includes('samba') || filename.includes('boots') || filename.includes('goose') || filename.includes('balance') || filename.includes('salomon') || filename.includes('mocassino')) {
+      } else if (pathLower.includes('/shoes/') || pathLower.includes('/footwear/') || pathLower.includes('/sneakers/') ||
+                 filename.includes('samba') || filename.includes('boots') || filename.includes('goose') || 
+                 filename.includes('balance') || filename.includes('salomon') || filename.includes('mocassino')) {
         category = 'shoes';
       }
       
