@@ -264,16 +264,17 @@ function generateOutfit(pools, rng) {
 }
 
 function layoutSquares(W, H, includeJacket) {
-  // Uniform square cells so visuals look consistent regardless of source dimensions
-  const GAP_Y = 8 * DPR;
-  const GAP_X = 10 * DPR;
+  // Uniform square cells so visuals look consistent; add a bit more breathing room
+  const GAP_Y = 12 * DPR;
+  const GAP_X = 14 * DPR;
   const rows = includeJacket ? 4 : 3;
   const maxCols = 2; // top row has two cells
 
   // Compute square side S to fit both horizontally and vertically
   const S_horiz = Math.floor((W - GAP_X * (maxCols - 1)) / maxCols);
   const S_vert = Math.floor((H - GAP_Y * (rows - 1)) / rows);
-  const S = Math.max(1, Math.min(S_horiz, S_vert));
+  // Slightly reduce size to avoid any visual crowding
+  const S = Math.max(1, Math.floor(Math.min(S_horiz, S_vert) * 0.9));
 
   const totalHeight = rows * S + GAP_Y * (rows - 1);
   let y = Math.floor((H - totalHeight) / 2);
@@ -360,14 +361,14 @@ function draw(sel, canvas) {
 
     // Draw ultra-minimal side arrows (“<” and “>”) OUTSIDE the square
     const midY = Math.floor(c.y + c.s / 2);
-    const padSide = Math.max(4 * DPR, Math.round(c.s * 0.06));
-    const fontPx = Math.max(12 * DPR, Math.round(c.s * 0.14));
+    const padSide = Math.max(6 * DPR, Math.round(c.s * 0.10));
+    const fontPx = Math.max(9 * DPR, Math.round(c.s * 0.08));
     ctx.save();
     ctx.font = `${fontPx}px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace`;
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'center';
     ctx.fillStyle = '#000';
-    ctx.globalAlpha = 0.6;
+    ctx.globalAlpha = 0.45;
     const leftText = '<';
     const rightText = '>';
     const leftW = Math.ceil(ctx.measureText(leftText).width);
