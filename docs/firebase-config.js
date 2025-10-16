@@ -1,13 +1,11 @@
 // Firebase Configuration
-// IMPORTANTE: Dovrai sostituire questi valori con i tuoi dopo aver creato il progetto Firebase
-
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyCp8RAzj2iElW5G2rINfAzxdYxeWcJrrDg",
+  authDomain: "outfit-generator-sal.firebaseapp.com",
+  projectId: "outfit-generator-sal",
+  storageBucket: "outfit-generator-sal.firebasestorage.app",
+  messagingSenderId: "1096370548797",
+  appId: "1:1096370548797:web:0ad96d420bacac9ac27a54"
 };
 
 // Inizializza Firebase
