@@ -126,14 +126,14 @@ function updateUserMenu(currentUser, viewingUsername) {
     if (viewingUsername && viewingUsername !== currentUser.displayName) {
       userMenu.innerHTML = `
         <span style="font-size: 12px; color: #666; margin-right: 12px;">Viewing ${viewingUsername}'s closet</span>
-        <a href="/">My Closet</a>
-        <a href="/upload.html">Upload</a>
+        <a href="index.html">My Closet</a>
+        <a href="upload.html">Upload</a>
         <a href="#" onclick="logout()">Logout</a>
       `;
     } else {
       userMenu.innerHTML = `
         <span style="font-size: 12px; color: #666; margin-right: 12px;">${currentUser.email}</span>
-        <a href="/upload.html">Upload</a>
+        <a href="upload.html">Upload</a>
         <a href="#" onclick="logout()">Logout</a>
       `;
     }
@@ -141,10 +141,10 @@ function updateUserMenu(currentUser, viewingUsername) {
     if (viewingUsername) {
       userMenu.innerHTML = `
         <span style="font-size: 12px; color: #666; margin-right: 12px;">${viewingUsername}'s closet</span>
-        <a href="/auth.html">Login</a>
+        <a href="auth.html">Login</a>
       `;
     } else {
-      userMenu.innerHTML = `<a href="/auth.html">Login</a>`;
+      userMenu.innerHTML = `<a href="auth.html">Login</a>`;
     }
   }
 }
@@ -156,7 +156,7 @@ window.logout = async function() {
     const firebase = await initFirebase();
     const auth = getAuth(firebase.app);
     await signOut(auth);
-    window.location.href = '/auth.html';
+    window.location.href = 'auth.html';
   } catch (error) {
     console.error('Logout error:', error);
   }

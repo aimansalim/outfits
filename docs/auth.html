@@ -172,7 +172,7 @@
         // Check if user is already logged in
         auth.onAuthStateChanged((user) => {
           if (user) {
-            window.location.href = '/';
+            window.location.href = 'index.html';
           }
         });
       })();
@@ -274,14 +274,14 @@
             
             showSuccess('Account created! Redirecting...');
             setTimeout(() => {
-              window.location.href = '/upload.html';
+              window.location.href = 'upload.html';
             }, 1500);
           } else {
             // Login
             await signInWithEmailAndPassword(auth, email, password);
             showSuccess('Login successful! Redirecting...');
             setTimeout(() => {
-              window.location.href = '/';
+              window.location.href = 'index.html';
             }, 1000);
           }
         } catch (error) {

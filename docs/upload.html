@@ -187,7 +187,7 @@
       <div>
         <span class="user-info" id="user-email"></span>
         <button onclick="shareCloset()">Share Closet</button>
-        <button onclick="window.location.href='/'">View Generator</button>
+        <button onclick="window.location.href='index.html'">View Generator</button>
         <button onclick="logout()">Logout</button>
       </div>
     </header>
@@ -289,19 +289,20 @@
             document.getElementById('user-email').textContent = user.email;
             await loadUserItems();
           } else {
-            window.location.href = '/auth.html';
+            window.location.href = 'auth.html';
           }
         });
       })();
       
       window.logout = async () => {
         await signOut(auth);
-        window.location.href = '/auth.html';
+        window.location.href = 'auth.html';
       };
       
       window.shareCloset = () => {
         if (!currentUser || !currentUser.displayName) return;
-        const shareUrl = `${window.location.origin}/?user=${currentUser.displayName}`;
+        const basePath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
+        const shareUrl = `${window.location.origin}${basePath}/index.html?user=${currentUser.displayName}`;
         
         // Try to copy to clipboard
         if (navigator.clipboard) {
