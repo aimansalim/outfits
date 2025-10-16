@@ -179,6 +179,27 @@
         padding: 20px;
         color: #666;
       }
+      .progress {
+        margin-top: 20px;
+        background: #f0f0f0;
+        height: 4px;
+        border-radius: 2px;
+        overflow: hidden;
+        display: none;
+      }
+      .progress-bar {
+        height: 100%;
+        background: #000;
+        width: 0%;
+        transition: width 0.3s;
+      }
+      .upload-status {
+        margin-top: 10px;
+        font-size: 12px;
+        color: #666;
+        text-align: center;
+        display: none;
+      }
     </style>
   </head>
   <body>
@@ -247,6 +268,11 @@
         </div>
         
         <button class="primary" id="upload-btn" disabled>Upload Item</button>
+        
+        <div class="progress" id="progress">
+          <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        <div class="upload-status" id="upload-status"></div>
       </div>
       
       <div class="items-list">
@@ -361,6 +387,39 @@
         reader.readAsDataURL(file);
       }
       
+      // Compress image before upload
+      async function compressImage(file, maxWidth = 1200) {
+        return new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+              const canvas = document.createElement('canvas');
+              let width = img.width;
+              let height = img.height;
+              
+              // Scale down if too large
+              if (width > maxWidth) {
+                height = (height * maxWidth) / width;
+                width = maxWidth;
+              }
+              
+              canvas.width = width;
+              canvas.height = height;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(img, 0, 0, width, height);
+              
+              // Convert to blob with 85% quality
+              canvas.toBlob((blob) => {
+                resolve(new File([blob], file.name, { type: 'image/jpeg' }));
+              }, 'image/jpeg', 0.85);
+            };
+            img.src = e.target.result;
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+      
       // Upload item
       uploadBtn.addEventListener('click', async () => {
         if (!selectedFile || !currentUser) return;
@@ -382,18 +441,39 @@
           .map(cb => cb.value);
         
         uploadBtn.disabled = true;
-        uploadBtn.textContent = 'Uploading...';
+        uploadBtn.textContent = 'Processing...';
+        
+        const progressEl = document.getElementById('progress');
+        const progressBar = document.getElementById('progress-bar');
+        const statusEl = document.getElementById('upload-status');
+        
+        progressEl.style.display = 'block';
+        statusEl.style.display = 'block';
         
         try {
-          // Upload image to Firebase Storage
-          const fileExt = selectedFile.name.split('.').pop();
+          // Step 1: Compress image
+          statusEl.textContent = 'Compressing image...';
+          progressBar.style.width = '25%';
+          const compressedFile = await compressImage(selectedFile);
+          console.log(`Original: ${(selectedFile.size / 1024).toFixed(0)}KB, Compressed: ${(compressedFile.size / 1024).toFixed(0)}KB`);
+          
+          // Step 2: Upload to Firebase Storage
+          statusEl.textContent = 'Uploading to cloud...';
+          progressBar.style.width = '50%';
+          const fileExt = 'jpg'; // Always use jpg after compression
           const fileName = `${currentUser.uid}/${Date.now()}.${fileExt}`;
           const storageRef = ref(storage, `clothes/${fileName}`);
           
-          await uploadBytes(storageRef, selectedFile);
+          await uploadBytes(storageRef, compressedFile);
+          
+          // Step 3: Get download URL
+          statusEl.textContent = 'Getting image URL...';
+          progressBar.style.width = '75%';
           const downloadURL = await getDownloadURL(storageRef);
           
-          // Create item object
+          // Step 4: Save to database
+          statusEl.textContent = 'Saving to your closet...';
+          progressBar.style.width = '90%';
           const item = {
             id: Date.now().toString(),
             name: name,
@@ -406,13 +486,20 @@
             uploadedAt: new Date().toISOString()
           };
           
-          // Add to Firestore
           const userRef = doc(db, 'users', currentUser.uid);
           await updateDoc(userRef, {
             items: arrayUnion(item)
           });
           
-          alert('Item uploaded successfully!');
+          // Done!
+          statusEl.textContent = 'Upload complete! ✓';
+          progressBar.style.width = '100%';
+          
+          setTimeout(() => {
+            progressEl.style.display = 'none';
+            statusEl.style.display = 'none';
+            progressBar.style.width = '0%';
+          }, 2000);
           
           // Reset form
           selectedFile = null;
@@ -428,9 +515,21 @@
           await loadUserItems();
         } catch (error) {
           console.error('Upload error:', error);
+          statusEl.textContent = 'Upload failed! Please try again.';
+          statusEl.style.color = '#c00';
+          progressBar.style.background = '#c00';
+          
           alert('Error uploading item: ' + error.message);
           uploadBtn.disabled = false;
           uploadBtn.textContent = 'Upload Item';
+          
+          setTimeout(() => {
+            progressEl.style.display = 'none';
+            statusEl.style.display = 'none';
+            statusEl.style.color = '#666';
+            progressBar.style.background = '#000';
+            progressBar.style.width = '0%';
+          }, 3000);
         }
       });
       
