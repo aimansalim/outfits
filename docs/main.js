@@ -670,15 +670,20 @@ async function regenerate(kind) {
   if (emptyState) emptyState.classList.add('hidden');
   if (canvas) canvas.style.display = 'block';
   
+  console.log(`Regenerating outfit (${kind}) with ${state.manifest.length} items`);
+  
   // Deterministic seed per action
   state.seed = (state.seed + (kind === 'remix' ? 1 : 17)) >>> 0;
   const rng = mulberry32(state.seed);
   const poolsAll = categorize();
   const style = chooseTargetStyle(poolsAll);
   const pools = filterByStyle(poolsAll, style);
+  console.log('Pools:', { tops: pools.top_base_tee?.length, overshirts: pools.top_overshirt?.length, pants: pools.bottom?.length, shoes: pools.shoes?.length });
   const sel = generateOutfit(pools, rng);
+  console.log('Selected outfit:', sel);
   const images = await loadImages(sel);
   sel.images = images;
+  console.log('Images loaded:', Object.keys(images));
   
   // Load EDC if enabled
   if (state.includeEDC) {
