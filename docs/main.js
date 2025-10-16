@@ -464,12 +464,21 @@ async function loadImages(sel) {
     img.onerror = rej;
     img.src = src;
   });
+  
+  console.log('Loading images for outfit:', {
+    top_base: sel.top_base?.file || 'null',
+    top_overshirt: sel.top_overshirt?.file || 'null',
+    outerwear: sel.outerwear?.file || 'null',
+    bottom: sel.bottom?.file || 'null',
+    shoes: sel.shoes?.file || 'null'
+  });
+  
   const images = {
-    top_base: await load(sel.top_base.file),
-    top_overshirt: await load(sel.top_overshirt.file),
+    top_base: sel.top_base ? await load(sel.top_base.file) : null,
+    top_overshirt: sel.top_overshirt ? await load(sel.top_overshirt.file) : null,
     outerwear: sel.outerwear ? await load(sel.outerwear.file) : null,
-    bottom: await load(sel.bottom.file),
-    shoes: await load(sel.shoes.file),
+    bottom: sel.bottom ? await load(sel.bottom.file) : null,
+    shoes: sel.shoes ? await load(sel.shoes.file) : null,
   };
   return images;
 }
