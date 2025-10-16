@@ -153,7 +153,7 @@
   <script type="module">
     import { initFirebase } from './firebase-config.js';
     import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-    import { doc, updateDoc, arrayUnion } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+    import { doc, getDoc, setDoc, arrayUnion } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
     import { ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
 
     let auth, db, storage, currentUser;
@@ -315,13 +315,17 @@
       
       try {
         // Compress
+        log(`  → Compressing...`, 'info');
         const compressed = await compressImage(file);
+        log(`  → Compressed: ${(file.size / 1024).toFixed(0)}KB → ${(compressed.size / 1024).toFixed(0)}KB`, 'info');
         
         // Upload to Storage
+        log(`  → Uploading to Firebase Storage...`, 'info');
         const fileName = `${currentUser.uid}/${Date.now()}_${index}.jpg`;
         const storageRef = ref(storage, `clothes/${fileName}`);
         await uploadBytes(storageRef, compressed);
         const downloadURL = await getDownloadURL(storageRef);
+        log(`  → Storage URL obtained`, 'info');
         
         // Create item object
         const item = {
@@ -336,15 +340,23 @@
           uploadedAt: new Date().toISOString()
         };
         
-        // Add to Firestore
+        // Add to Firestore (use setDoc with merge to handle existing/non-existing docs)
+        log(`  → Saving to Firestore...`, 'info');
         const userRef = doc(db, 'users', currentUser.uid);
-        await updateDoc(userRef, {
-          items: arrayUnion(item)
-        });
+        
+        // Get current user doc
+        const userDoc = await getDoc(userRef);
+        const currentItems = userDoc.exists() && userDoc.data().items ? userDoc.data().items : [];
+        
+        // Add new item
+        await setDoc(userRef, {
+          items: [...currentItems, item]
+        }, { merge: true });
         
         log(`✅ [${index + 1}/${total}] Uploaded: ${info.name}`, 'success');
         return { success: true, item: info.name };
       } catch (error) {
+        console.error('Upload error:', error);
         log(`❌ [${index + 1}/${total}] Failed: ${info.name} - ${error.message}`, 'error');
         return { success: false, item: info.name, error: error.message };
       }
@@ -365,6 +377,7 @@
       statusEl.textContent = 'Starting bulk upload...';
       
       log(`🚀 Starting upload of ${selectedFiles.length} items...`, 'info');
+      log(`👤 User: ${currentUser.email} (${currentUser.uid})`, 'info');
       
       const results = [];
       
@@ -376,6 +389,11 @@
         const progress = ((i + 1) / selectedFiles.length) * 100;
         progressBar.style.width = `${progress}%`;
         statusEl.textContent = `Uploading: ${i + 1}/${selectedFiles.length}`;
+        
+        // Small delay to avoid overwhelming Firebase
+        if (i < selectedFiles.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 300));
+        }
       }
       
       // Summary
