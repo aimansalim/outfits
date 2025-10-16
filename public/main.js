@@ -265,8 +265,8 @@ function generateOutfit(pools, rng) {
 
 function layoutSquares(W, H, includeJacket) {
   // Uniform square cells so visuals look consistent; add a bit more breathing room
-  const GAP_Y = 12 * DPR;
-  const GAP_X = 14 * DPR;
+  const GAP_Y = 14 * DPR;
+  const GAP_X = 16 * DPR;
   const rows = includeJacket ? 4 : 3;
   const maxCols = 2; // top row has two cells
 
@@ -274,7 +274,7 @@ function layoutSquares(W, H, includeJacket) {
   const S_horiz = Math.floor((W - GAP_X * (maxCols - 1)) / maxCols);
   const S_vert = Math.floor((H - GAP_Y * (rows - 1)) / rows);
   // Slightly reduce size to avoid any visual crowding
-  const S = Math.max(1, Math.floor(Math.min(S_horiz, S_vert) * 0.9));
+  const S = Math.max(1, Math.floor(Math.min(S_horiz, S_vert) * 0.84));
 
   const totalHeight = rows * S + GAP_Y * (rows - 1);
   let y = Math.floor((H - totalHeight) / 2);
@@ -361,14 +361,14 @@ function draw(sel, canvas) {
 
     // Draw ultra-minimal side arrows (“<” and “>”) OUTSIDE the square
     const midY = Math.floor(c.y + c.s / 2);
-    const padSide = Math.max(6 * DPR, Math.round(c.s * 0.10));
-    const fontPx = Math.max(9 * DPR, Math.round(c.s * 0.08));
+    const padSide = Math.max(8 * DPR, Math.round(c.s * 0.12));
+    const fontPx = Math.max(8 * DPR, Math.round(c.s * 0.05));
     ctx.save();
     ctx.font = `${fontPx}px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace`;
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'center';
     ctx.fillStyle = '#000';
-    ctx.globalAlpha = 0.45;
+    ctx.globalAlpha = 0.35;
     const leftText = '<';
     const rightText = '>';
     const leftW = Math.ceil(ctx.measureText(leftText).width);
@@ -381,9 +381,9 @@ function draw(sel, canvas) {
     ctx.fillText(leftText, leftX, midY);
     ctx.fillText(rightText, rightX, midY);
     ctx.restore();
-    const hitH = Math.ceil(fontPx * 1.2);
-    const hitWL = Math.max(leftW, fontPx);
-    const hitWR = Math.max(rightW, fontPx);
+    const hitH = Math.ceil(fontPx * 3);
+    const hitWL = Math.max(leftW * 3, fontPx * 3);
+    const hitWR = Math.max(rightW * 3, fontPx * 3);
     state.arrowHitboxes.push({rect: {x: Math.floor(leftX - hitWL / 2), y: Math.floor(midY - hitH / 2), w: hitWL, h: hitH}, category: c.category, dir: -1});
     state.arrowHitboxes.push({rect: {x: Math.floor(rightX - hitWR / 2), y: Math.floor(midY - hitH / 2), w: hitWR, h: hitH}, category: c.category, dir: +1});
   }
