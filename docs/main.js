@@ -637,11 +637,12 @@ function draw(sel, canvas) {
 }
 
 async function regenerate(kind) {
+  const emptyState = document.getElementById('empty-state');
+  const canvas = document.getElementById('c');
+  
   // Check if there are any items
   if (!state.manifest || state.manifest.length === 0) {
     console.log('No items in closet - showing empty state');
-    const emptyState = document.getElementById('empty-state');
-    const canvas = document.getElementById('c');
     
     // Check if we're viewing someone else's closet
     const urlParams = new URLSearchParams(window.location.search);
@@ -650,15 +651,13 @@ async function regenerate(kind) {
     if (emptyState) {
       if (viewingUsername) {
         emptyState.innerHTML = `
-          <h2>${viewingUsername}'s Closet is Empty</h2>
-          <p>This user hasn't uploaded any clothes yet.</p>
-          <a href="index.html">Go to My Closet</a>
+          <p>${viewingUsername}'s closet is empty</p>
+          <a href="index.html">[go to my closet]</a>
         `;
       } else {
         emptyState.innerHTML = `
-          <h2>Your Closet is Empty</h2>
-          <p>Upload your clothes to start generating personalized outfits!</p>
-          <a href="upload.html">Upload Your First Item</a>
+          <p>your closet is empty</p>
+          <a href="upload.html">[upload clothes]</a>
         `;
       }
       emptyState.classList.remove('hidden');
@@ -667,9 +666,7 @@ async function regenerate(kind) {
     return;
   }
   
-  // Hide empty state if visible
-  const emptyState = document.getElementById('empty-state');
-  const canvas = document.getElementById('c');
+  // Hide empty state and show canvas if we have items
   if (emptyState) emptyState.classList.add('hidden');
   if (canvas) canvas.style.display = 'block';
   
