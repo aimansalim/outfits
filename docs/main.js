@@ -45,12 +45,20 @@ async function loadManifest() {
   // Try to load from Firebase first
   try {
     const { initFirebase } = await import('./firebase-config.js');
-    const { getAuth } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js');
-    const { getFirestore, doc, getDoc, collection, query, where, getDocs } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
+    const { getAuth, onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js');
+    const { getFirestore, doc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
     
     const firebase = await initFirebase();
     const auth = getAuth(firebase.app);
     const db = getFirestore(firebase.app);
+    
+    // Wait for auth state to be ready
+    await new Promise(resolve => {
+      const unsubscribe = onAuthStateChanged(auth, () => {
+        unsubscribe();
+        resolve();
+      });
+    });
     
     // Check if viewing specific user's closet
     const urlParams = new URLSearchParams(window.location.search);
@@ -116,28 +124,29 @@ function updateUserMenu(currentUser, viewingUsername) {
   if (!userMenu) return;
   
   if (currentUser) {
+    const displayName = currentUser.displayName || currentUser.email.split('@')[0];
     if (viewingUsername && viewingUsername !== currentUser.displayName) {
       userMenu.innerHTML = `
         <span style="font-size: 12px; color: #666; margin-right: 12px;">Viewing ${viewingUsername}'s closet</span>
         <a href="index.html">My Closet</a>
         <a href="upload.html">Upload</a>
-        <a href="#" onclick="logout()">Logout</a>
+        <a href="#" onclick="logout()" style="color: #c00;">Logout (${displayName})</a>
       `;
     } else {
       userMenu.innerHTML = `
-        <span style="font-size: 12px; color: #666; margin-right: 12px;">${currentUser.email}</span>
+        <span style="font-size: 12px; color: #666; margin-right: 12px;">@${displayName}</span>
         <a href="upload.html">Upload</a>
-        <a href="#" onclick="logout()">Logout</a>
+        <a href="#" onclick="logout()" style="color: #c00;">Logout</a>
       `;
     }
   } else {
     if (viewingUsername) {
       userMenu.innerHTML = `
         <span style="font-size: 12px; color: #666; margin-right: 12px;">${viewingUsername}'s closet</span>
-        <a href="auth.html">Login</a>
+        <a href="auth.html">Login / Sign up</a>
       `;
     } else {
-      userMenu.innerHTML = `<a href="auth.html">Login</a>`;
+      userMenu.innerHTML = `<a href="auth.html">Login / Sign up</a>`;
     }
   }
 }
