@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Outfit</title>
+    <style>
+      html, body { height: 100%; }
+      body {
+        margin: 0;
+        background: #fff;
+        font: 12px/1.2 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        color: #000;
+      }
+      .wrap { display: grid; grid-template-rows: auto 1fr; height: 100%; }
+      header { text-align: right; padding: 8px 10px; }
+      a { color: #000; text-decoration: none; margin-left: 12px; }
+      a:hover { text-decoration: underline; }
+      canvas { width: 100%; height: calc(100vh - 28px); display: block; background: #fff; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <a href="#" id="create">Create</a>
+        <a href="#" id="jacket">Jacket: OFF</a>
+        <a href="#" id="remix">Remix</a>
+        <a href="#" id="download">Download</a>
+        <a href="#" id="save15">Save15</a>
+      </header>
+      <canvas id="c"></canvas>
+    </div>
+    <script type="module" src="main.js"></script>
+  </body>
+  </html>
+
+
+
