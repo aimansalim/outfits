@@ -42,15 +42,125 @@ function pickNoRepeat(arr, rng, lastId) {
 }
 
 async function loadManifest() {
-  const res = await fetch('manifest.json');
-  const data = await res.json();
-  state.manifest = data;
+  // Try to load from Firebase first
+  try {
+    const { initFirebase } = await import('./firebase-config.js');
+    const { getAuth } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js');
+    const { getFirestore, doc, getDoc, collection, query, where, getDocs } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
+    
+    const firebase = await initFirebase();
+    const auth = getAuth(firebase.app);
+    const db = getFirestore(firebase.app);
+    
+    // Check if viewing specific user's closet
+    const urlParams = new URLSearchParams(window.location.search);
+    const username = urlParams.get('user');
+    
+    let items = null;
+    let displayUsername = null;
+    
+    if (username) {
+      // Load specific user's closet
+      const usernameDoc = await getDoc(doc(db, 'usernames', username.toLowerCase()));
+      if (usernameDoc.exists()) {
+        const uid = usernameDoc.data().uid;
+        const userDoc = await getDoc(doc(db, 'users', uid));
+        if (userDoc.exists()) {
+          items = userDoc.data().items || [];
+          displayUsername = username;
+        }
+      }
+    } else if (auth.currentUser) {
+      // Load logged-in user's closet
+      const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid));
+      if (userDoc.exists()) {
+        items = userDoc.data().items || [];
+        displayUsername = auth.currentUser.displayName;
+      }
+    }
+    
+    if (items && items.length > 0) {
+      state.manifest = items;
+      console.log(`Loaded ${items.length} items from ${displayUsername}'s closet`);
+      
+      // Update user menu
+      updateUserMenu(auth.currentUser, displayUsername);
+      
+      try {
+        state.lastSelected = JSON.parse(localStorage.getItem('lastSelected') || 'null');
+      } catch (_) {
+        state.lastSelected = null;
+      }
+      return;
+    }
+    
+    // Update user menu even if no items
+    updateUserMenu(auth.currentUser, displayUsername);
+  } catch (error) {
+    console.log('Firebase not configured or error loading user data:', error.message);
+  }
+  
+  // Fallback to static manifest.json
+  try {
+    const res = await fetch('manifest.json');
+    const data = await res.json();
+    state.manifest = data;
+    console.log('Loaded static manifest');
+  } catch (error) {
+    console.error('Error loading manifest:', error);
+    state.manifest = [];
+  }
+  
   try {
     state.lastSelected = JSON.parse(localStorage.getItem('lastSelected') || 'null');
   } catch (_) {
     state.lastSelected = null;
   }
 }
+
+function updateUserMenu(currentUser, viewingUsername) {
+  const userMenu = document.getElementById('user-menu');
+  if (!userMenu) return;
+  
+  if (currentUser) {
+    if (viewingUsername && viewingUsername !== currentUser.displayName) {
+      userMenu.innerHTML = `
+        <span style="font-size: 12px; color: #666; margin-right: 12px;">Viewing ${viewingUsername}'s closet</span>
+        <a href="/">My Closet</a>
+        <a href="/upload.html">Upload</a>
+        <a href="#" onclick="logout()">Logout</a>
+      `;
+    } else {
+      userMenu.innerHTML = `
+        <span style="font-size: 12px; color: #666; margin-right: 12px;">${currentUser.email}</span>
+        <a href="/upload.html">Upload</a>
+        <a href="#" onclick="logout()">Logout</a>
+      `;
+    }
+  } else {
+    if (viewingUsername) {
+      userMenu.innerHTML = `
+        <span style="font-size: 12px; color: #666; margin-right: 12px;">${viewingUsername}'s closet</span>
+        <a href="/auth.html">Login</a>
+      `;
+    } else {
+      userMenu.innerHTML = `<a href="/auth.html">Login</a>`;
+    }
+  }
+}
+
+window.logout = async function() {
+  try {
+    const { initFirebase } = await import('./firebase-config.js');
+    const { getAuth, signOut } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js');
+    const firebase = await initFirebase();
+    const auth = getAuth(firebase.app);
+    await signOut(auth);
+    window.location.href = '/auth.html';
+  } catch (error) {
+    console.error('Logout error:', error);
+  }
+};
 
 async function loadEDCPairings() {
   try {
