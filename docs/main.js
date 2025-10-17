@@ -595,8 +595,8 @@ function draw(sel, canvas) {
     const S = cells.length > 0 ? cells[0].s : 100;
     const edcSquareSize = Math.floor(S * 0.85); // EDC square size
     
-    // Position EDC square in bottom right corner
-    const edcSquareX = W - edcSquareSize - 20 * DPR;
+    // Position EDC square MORE to the right (less padding)
+    const edcSquareX = W - edcSquareSize - 10 * DPR;
     const edcSquareY = H - edcSquareSize - 20 * DPR;
     
     // Store EDC square position for click detection
@@ -639,30 +639,31 @@ function draw(sel, canvas) {
       offsetX += itemSize + spacing;
     }
     
-    // Draw arrows for EDC swapping (similar to outfit items)
+    // Draw arrows for EDC swapping - CLOSER to the square
     const midY = Math.floor(edcSquareY + edcSquareSize / 2);
-    const padSide = Math.max(8 * DPR, Math.round(edcSquareSize * 0.08));
-    const fontPx = Math.max(8 * DPR, Math.round(edcSquareSize * 0.04));
+    const padSide = Math.max(6 * DPR, Math.round(edcSquareSize * 0.05)); // Closer arrows
+    const fontPx = Math.max(10 * DPR, Math.round(edcSquareSize * 0.06)); // Bigger arrows
     ctx.save();
     ctx.font = `${fontPx}px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace`;
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'center';
     ctx.fillStyle = '#000';
-    ctx.globalAlpha = 0.35;
+    ctx.globalAlpha = 0.4; // More visible
     const leftText = '<';
     const rightText = '>';
     const leftW = Math.ceil(ctx.measureText(leftText).width);
     const rightW = Math.ceil(ctx.measureText(rightText).width);
     let leftX = edcSquareX - padSide - Math.ceil(leftW / 2);
     let rightX = edcSquareX + edcSquareSize + padSide + Math.ceil(rightW / 2);
-    leftX = Math.max(leftW / 2, leftX);
-    rightX = Math.min(W - rightW / 2, rightX);
+    // Ensure arrows are visible (don't clip them)
+    leftX = Math.max(leftW, leftX);
+    rightX = Math.min(W - rightW - 4 * DPR, rightX); // Keep right arrow fully visible
     ctx.fillText(leftText, leftX, midY);
     ctx.fillText(rightText, rightX, midY);
     ctx.restore();
-    const hitH = Math.ceil(fontPx * 3);
-    const hitWL = Math.max(leftW * 3, fontPx * 3);
-    const hitWR = Math.max(rightW * 3, fontPx * 3);
+    const hitH = Math.ceil(fontPx * 4);
+    const hitWL = Math.max(leftW * 4, fontPx * 4);
+    const hitWR = Math.max(rightW * 4, fontPx * 4);
     state.arrowHitboxes.push({rect: {x: Math.floor(leftX - hitWL / 2), y: Math.floor(midY - hitH / 2), w: hitWL, h: hitH}, category: 'edc', dir: -1});
     state.arrowHitboxes.push({rect: {x: Math.floor(rightX - hitWR / 2), y: Math.floor(midY - hitH / 2), w: hitWR, h: hitH}, category: 'edc', dir: +1});
   }
@@ -775,12 +776,14 @@ function hookup() {
   }
 
   function toggleJacket() {
+    console.log('Toggling jacket:', !state.includeJacket);
     state.includeJacket = !state.includeJacket; 
     updateJacketLabel(); 
     regenerate('jacket');
   }
   
   function toggleEDC() {
+    console.log('Toggling EDC:', !state.includeEDC);
     state.includeEDC = !state.includeEDC; 
     updateEDCLabel(); 
     regenerate('edc');
@@ -921,14 +924,28 @@ function hookup() {
   }
   
   function doSave() {
+    if (!currentSel) {
+      console.error('No outfit selected!');
+      alert('No outfit to save! Please wait for the outfit to load.');
+      return;
+    }
+    
+    console.log('Saving outfit...', currentSel);
     const targetWidth = 1080;
     const targetHeight = 1920;
-    const tempCanvas = renderToCanvas(targetWidth, targetHeight, currentSel);
     
-    const link = document.createElement('a');
-    link.download = 'outfit.png';
-    link.href = tempCanvas.toDataURL('image/png');
-    link.click();
+    try {
+      const tempCanvas = renderToCanvas(targetWidth, targetHeight, currentSel);
+      
+      const link = document.createElement('a');
+      link.download = `outfit-${Date.now()}.png`;
+      link.href = tempCanvas.toDataURL('image/png');
+      link.click();
+      console.log('Outfit saved!');
+    } catch (error) {
+      console.error('Error saving outfit:', error);
+      alert('Error saving outfit: ' + error.message);
+    }
   }
 
   jacket.addEventListener('click', toggleJacket);
