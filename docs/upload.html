@@ -448,9 +448,10 @@
               const ctx = canvas.getContext('2d');
               ctx.drawImage(img, 0, 0, width, height);
               
+              // Preserve PNG format for transparent backgrounds
               canvas.toBlob((blob) => {
-                resolve(new File([blob], file.name, { type: 'image/jpeg' }));
-              }, 'image/jpeg', 0.85);
+                resolve(new File([blob], file.name, { type: 'image/png' }));
+              }, 'image/png');
             };
             img.src = e.target.result;
           };
@@ -495,7 +496,7 @@
           
           statusEl.textContent = 'uploading...';
           progressBar.style.width = '50%';
-          const fileName = `${currentUser.uid}/${Date.now()}.jpg`;
+          const fileName = `${currentUser.uid}/${Date.now()}.png`;
           const storageRef = ref(storage, `clothes/${fileName}`);
           await uploadBytes(storageRef, compressed);
           
