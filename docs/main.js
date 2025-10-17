@@ -708,33 +708,63 @@ async function regenerate(kind) {
   
   console.log(`Regenerating outfit (${kind}) with ${state.manifest.length} items`);
   
-  // Deterministic seed per action
-  state.seed = (state.seed + (kind === 'remix' ? 1 : 17)) >>> 0;
-  const rng = mulberry32(state.seed);
-  const poolsAll = categorize();
-  const style = chooseTargetStyle(poolsAll);
-  const pools = filterByStyle(poolsAll, style);
-  console.log('Pools:', { tops: pools.top_base_tee?.length, overshirts: pools.top_overshirt?.length, pants: pools.bottom?.length, shoes: pools.shoes?.length });
-  const sel = generateOutfit(pools, rng);
-  console.log('Selected outfit:', sel);
-  const images = await loadImages(sel);
-  sel.images = images;
-  console.log('Images loaded:', Object.keys(images));
+  let sel;
   
-  // Load EDC if enabled
-  if (state.includeEDC) {
-    console.log('EDC is enabled, choosing pairing...');
-    const edcPairing = chooseEDCPairing(sel, rng);
-    console.log('Selected EDC pairing:', edcPairing?.name || 'none');
-    if (edcPairing) {
-      const edcImages = await loadEDCImages(edcPairing);
-      console.log('Loaded EDC images:', edcImages.length);
-      sel.edcImages = edcImages;
-      state.currentEDC = edcPairing;
+  // If only toggling EDC or Jacket, keep the existing outfit
+  if ((kind === 'edc' || kind === 'jacket') && currentSel) {
+    console.log(`Keeping existing outfit, only toggling ${kind}`);
+    sel = currentSel;
+    
+    // Generate RNG for EDC pairing
+    const rng = mulberry32(state.seed);
+    
+    // Update EDC if needed
+    if (kind === 'edc') {
+      if (state.includeEDC) {
+        console.log('EDC is enabled, choosing pairing...');
+        const edcPairing = chooseEDCPairing(sel, rng);
+        console.log('Selected EDC pairing:', edcPairing?.name || 'none');
+        if (edcPairing) {
+          const edcImages = await loadEDCImages(edcPairing);
+          console.log('Loaded EDC images:', edcImages.length);
+          sel.edcImages = edcImages;
+          state.currentEDC = edcPairing;
+        }
+      } else {
+        // Remove EDC
+        sel.edcImages = null;
+        state.currentEDC = null;
+      }
     }
+    
+    // Jacket toggling is automatic via state.includeJacket
+    
   } else {
-    sel.edcImages = [];
-    state.currentEDC = null;
+    // Generate new outfit
+    state.seed = (state.seed + (kind === 'remix' ? 1 : 17)) >>> 0;
+    const rng = mulberry32(state.seed);
+    const poolsAll = categorize();
+    const style = chooseTargetStyle(poolsAll);
+    const pools = filterByStyle(poolsAll, style);
+    console.log('Pools:', { tops: pools.top_base_tee?.length, overshirts: pools.top_overshirt?.length, pants: pools.bottom?.length, shoes: pools.shoes?.length });
+    sel = generateOutfit(pools, rng);
+    console.log('Selected outfit:', sel);
+    const images = await loadImages(sel);
+    sel.images = images;
+    console.log('Images loaded:', Object.keys(images));
+    
+    // Load EDC if enabled
+    if (state.includeEDC) {
+      console.log('EDC is enabled, choosing pairing...');
+      const edcPairing = chooseEDCPairing(sel, rng);
+      console.log('Selected EDC pairing:', edcPairing?.name || 'none');
+      if (edcPairing) {
+        const edcImages = await loadEDCImages(edcPairing);
+        console.log('Loaded EDC images:', edcImages.length);
+        sel.edcImages = edcImages;
+        state.currentEDC = edcPairing;
+      }
+    }
   }
   
   draw(sel, document.getElementById('c'));
