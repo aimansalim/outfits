@@ -176,8 +176,8 @@ function categorize() {
     top_base_tee: top_bases.filter((x) => isTeeLikeBase(x) && !isCrewneckBase(x)),
     top_base_crewneck: top_bases.filter((x) => isCrewneckBase(x)),
     top_overshirt: m.filter((x) => x.category === 'top' && x.topLayer === 'overshirt'),
-    outerwear: m.filter((x) => x.category === 'outerwear'),
-    bottom: m.filter((x) => x.category === 'bottom'),
+    outerwear: m.filter((x) => x.category === 'outerwear' || x.category === 'jacket'),
+    bottom: m.filter((x) => x.category === 'bottom' || x.category === 'pants'),
     shoes: m.filter((x) => x.category === 'shoes'),
   };
   return byCat;
@@ -808,9 +808,9 @@ function hookup() {
     const positions = [];
     
     // Jacket (if present) - top left, larger
-    if (sel.outerwear) {
+    if (sel.images.outerwear) {
       positions.push({
-        img: sel.images.jacket,
+        img: sel.images.outerwear,
         x: padding + baseSize * 0.1,
         y: padding,
         scale: 1.3

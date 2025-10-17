@@ -368,7 +368,19 @@
       
       <!-- Items list -->
       <div class="items-list">
-        <h2>[your items] <span id="item-count">0</span></h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h2 style="margin: 0;">[your items] <span id="item-count">0</span></h2>
+          <div style="display: flex; gap: 8px;">
+            <button id="fix-categories-btn" style="padding: 6px 12px; background: #fff; border: 1px solid #666; color: #666; cursor: pointer; font: inherit; font-size: 10px;">[fix old categories]</button>
+            <select id="category-filter" style="padding: 6px 12px; border: 1px solid #ddd; font: inherit; font-size: 10px; cursor: pointer;">
+              <option value="all">all items</option>
+              <option value="top">tops</option>
+              <option value="bottom">bottoms</option>
+              <option value="jacket">jackets</option>
+              <option value="shoes">shoes</option>
+            </select>
+          </div>
+        </div>
         <button id="delete-selected-btn" style="display:none; margin-bottom: 20px; padding: 8px 16px; background: #fff; border: 1px solid #c00; color: #c00; cursor: pointer; font: inherit; font-size: 11px;">[delete selected (<span id="selected-count">0</span>)]</button>
         <div class="loading" id="loading">loading...</div>
         <div class="items-grid" id="items-grid"></div>
@@ -386,6 +398,7 @@
       let selectedItems = new Set();
       let lastSelectedIndex = -1;
       let allItems = [];
+      let currentFilter = 'all';
 
       // Initialize Firebase
       const firebase = await initFirebase();
@@ -619,7 +632,22 @@
             loading.style.display = 'none';
             allItems = items.reverse();
             
-            allItems.forEach((item, index) => {
+            // Filter items by category
+            const filteredItems = currentFilter === 'all' 
+              ? allItems 
+              : allItems.filter(item => {
+                  // Handle both 'pants' and 'bottom' for compatibility
+                  if (currentFilter === 'bottom') {
+                    return item.category === 'bottom' || item.category === 'pants';
+                  }
+                  // Handle both 'jacket' and 'outerwear' for compatibility
+                  if (currentFilter === 'jacket') {
+                    return item.category === 'jacket' || item.category === 'outerwear';
+                  }
+                  return item.category === currentFilter;
+                });
+            
+            filteredItems.forEach((item, index) => {
               const card = document.createElement('div');
               card.className = 'item-card';
               card.dataset.index = index;
@@ -772,6 +800,58 @@
         } catch (error) {
           console.error('Delete error:', error);
           alert('failed to delete: ' + error.message);
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+        }
+      });
+      
+      // Category filter
+      document.getElementById('category-filter').addEventListener('change', (e) => {
+        currentFilter = e.target.value;
+        loadUserItems();
+      });
+      
+      // Fix old categories (pants → bottom, jacket → outerwear)
+      document.getElementById('fix-categories-btn').addEventListener('click', async () => {
+        if (!confirm('fix old category names? (pants → bottom, jacket → outerwear)')) return;
+        
+        const btn = document.getElementById('fix-categories-btn');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '[fixing...]';
+        btn.disabled = true;
+        
+        try {
+          const userRef = doc(db, 'users', currentUser.uid);
+          const userDoc = await getDoc(userRef);
+          const items = userDoc.data().items || [];
+          
+          let fixedCount = 0;
+          const updatedItems = items.map(item => {
+            if (item.category === 'pants') {
+              fixedCount++;
+              return { ...item, category: 'bottom' };
+            }
+            if (item.category === 'jacket') {
+              fixedCount++;
+              return { ...item, category: 'outerwear' };
+            }
+            return item;
+          });
+          
+          if (fixedCount === 0) {
+            alert('no items to fix!');
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            return;
+          }
+          
+          await setDoc(userRef, { items: updatedItems }, { merge: true });
+          alert(`fixed ${fixedCount} items!`);
+          await loadUserItems();
+          btn.style.display = 'none'; // Hide button after fixing
+        } catch (error) {
+          console.error('Fix error:', error);
+          alert('failed to fix: ' + error.message);
           btn.innerHTML = originalText;
           btn.disabled = false;
         }
