@@ -201,6 +201,12 @@
       }
       .item-card {
         position: relative;
+        cursor: pointer;
+        user-select: none;
+      }
+      .item-card.selected .img-wrap {
+        border-color: #000 !important;
+        background: #f8f8f8;
       }
       .item-card .img-wrap {
         width: 100%;
@@ -213,6 +219,7 @@
         position: relative;
         overflow: hidden;
         border: 1px solid #f0f0f0;
+        transition: all 0.15s;
       }
       .item-card img {
         max-width: 85%;
@@ -221,6 +228,26 @@
         height: auto !important;
         object-fit: contain;
         object-position: center;
+      }
+      .item-card .select-indicator {
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        width: 20px;
+        height: 20px;
+        border: 2px solid #ccc;
+        background: rgba(255,255,255,0.95);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        pointer-events: none;
+        z-index: 2;
+      }
+      .item-card.selected .select-indicator {
+        background: #000;
+        border-color: #000;
+        color: #fff;
       }
       .item-card .delete-btn {
         position: absolute;
@@ -239,11 +266,15 @@
         align-items: center;
         justify-content: center;
         border-radius: 2px;
+        z-index: 3;
       }
       .item-card .delete-btn:hover {
         background: #fff;
         color: #c00;
         border-color: #c00;
+      }
+      .item-card.has-selection .delete-btn {
+        display: none;
       }
       .item-card .info {
         font-size: 10px;
@@ -338,6 +369,7 @@
       <!-- Items list -->
       <div class="items-list">
         <h2>[your items] <span id="item-count">0</span></h2>
+        <button id="delete-selected-btn" style="display:none; margin-bottom: 20px; padding: 8px 16px; background: #fff; border: 1px solid #c00; color: #c00; cursor: pointer; font: inherit; font-size: 11px;">[delete selected (<span id="selected-count">0</span>)]</button>
         <div class="loading" id="loading">loading...</div>
         <div class="items-grid" id="items-grid"></div>
       </div>
@@ -351,6 +383,9 @@
 
       let auth, db, storage, currentUser;
       let selectedFile = null;
+      let selectedItems = new Set();
+      let lastSelectedIndex = -1;
+      let allItems = [];
 
       // Initialize Firebase
       const firebase = await initFirebase();
@@ -567,6 +602,8 @@
         
         loading.style.display = 'block';
         grid.innerHTML = '';
+        selectedItems.clear();
+        updateDeleteButton();
         
         try {
           const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
@@ -580,10 +617,14 @@
             }
             
             loading.style.display = 'none';
+            allItems = items.reverse();
             
-            items.reverse().forEach(item => {
+            allItems.forEach((item, index) => {
               const card = document.createElement('div');
               card.className = 'item-card';
+              card.dataset.index = index;
+              card.dataset.itemId = item.id;
+              card.dataset.storagePath = item.storagePath;
               
               const colors = item.colorHints?.join(', ') || '';
               const styles = item.styleHints?.join(', ') || '';
@@ -591,11 +632,46 @@
               
               card.innerHTML = `
                 <div class="img-wrap">
+                  <div class="select-indicator">✓</div>
                   <img src="${item.file}" alt="${item.name}" />
                   <button class="delete-btn" onclick="deleteItem('${item.id}', '${item.storagePath}')">×</button>
                 </div>
                 <div class="info">${item.name} · ${item.category}${topLayer}</div>
               `;
+              
+              // Click handler for selection
+              card.addEventListener('click', (e) => {
+                // Don't select if clicking delete button
+                if (e.target.classList.contains('delete-btn')) return;
+                
+                const idx = parseInt(card.dataset.index);
+                
+                if (e.shiftKey && lastSelectedIndex !== -1) {
+                  // Shift+click: select range
+                  const start = Math.min(lastSelectedIndex, idx);
+                  const end = Math.max(lastSelectedIndex, idx);
+                  for (let i = start; i <= end; i++) {
+                    selectedItems.add(allItems[i].id);
+                  }
+                } else if (e.metaKey || e.ctrlKey) {
+                  // Cmd/Ctrl+click: toggle individual
+                  if (selectedItems.has(item.id)) {
+                    selectedItems.delete(item.id);
+                  } else {
+                    selectedItems.add(item.id);
+                  }
+                } else {
+                  // Regular click: toggle
+                  if (selectedItems.has(item.id)) {
+                    selectedItems.delete(item.id);
+                  } else {
+                    selectedItems.add(item.id);
+                  }
+                }
+                
+                lastSelectedIndex = idx;
+                updateSelection();
+              });
               
               grid.appendChild(card);
             });
@@ -603,6 +679,38 @@
         } catch (error) {
           console.error('Load error:', error);
           loading.textContent = 'failed to load items';
+        }
+      }
+      
+      function updateSelection() {
+        document.querySelectorAll('.item-card').forEach(card => {
+          const itemId = card.dataset.itemId;
+          if (selectedItems.has(itemId)) {
+            card.classList.add('selected');
+          } else {
+            card.classList.remove('selected');
+          }
+          
+          // Hide/show individual delete buttons
+          if (selectedItems.size > 0) {
+            card.classList.add('has-selection');
+          } else {
+            card.classList.remove('has-selection');
+          }
+        });
+        
+        updateDeleteButton();
+      }
+      
+      function updateDeleteButton() {
+        const btn = document.getElementById('delete-selected-btn');
+        const countSpan = document.getElementById('selected-count');
+        
+        if (selectedItems.size > 0) {
+          btn.style.display = 'inline-block';
+          countSpan.textContent = selectedItems.size;
+        } else {
+          btn.style.display = 'none';
         }
       }
 
@@ -629,6 +737,45 @@
           alert('failed to delete: ' + error.message);
         }
       };
+      
+      // Delete selected items
+      document.getElementById('delete-selected-btn').addEventListener('click', async () => {
+        if (!confirm(`delete ${selectedItems.size} items?`)) return;
+        
+        const btn = document.getElementById('delete-selected-btn');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '[deleting...]';
+        btn.disabled = true;
+        
+        try {
+          const userRef = doc(db, 'users', currentUser.uid);
+          const userDoc = await getDoc(userRef);
+          const items = userDoc.data().items || [];
+          
+          // Find items to delete
+          const itemsToDelete = items.filter(item => selectedItems.has(item.id));
+          
+          // Delete from storage (in parallel)
+          await Promise.all(itemsToDelete.map(item => {
+            const storageRef = ref(storage, `clothes/${item.storagePath}`);
+            return deleteObject(storageRef).catch(err => {
+              console.warn(`Failed to delete storage file for ${item.id}:`, err);
+            });
+          }));
+          
+          // Delete from firestore
+          const updatedItems = items.filter(item => !selectedItems.has(item.id));
+          await setDoc(userRef, { items: updatedItems }, { merge: true });
+          
+          selectedItems.clear();
+          await loadUserItems();
+        } catch (error) {
+          console.error('Delete error:', error);
+          alert('failed to delete: ' + error.message);
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+        }
+      });
     </script>
   </body>
 </html>
