@@ -467,13 +467,28 @@ function layoutSquares(W, H, includeJacket) {
 }
 
 async function loadImages(sel) {
-  const load = (src) => new Promise((res, rej) => {
-    const img = new Image();
-    img.crossOrigin = "anonymous"; // Allow canvas export with Firebase images
-    img.onload = () => res(img);
-    img.onerror = rej;
-    img.src = src;
-  });
+  const load = async (src) => {
+    try {
+      // Fetch image as blob to bypass CORS restrictions
+      const response = await fetch(src);
+      if (!response.ok) throw new Error(`Failed to fetch: ${response.status}`);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      
+      return new Promise((res, rej) => {
+        const img = new Image();
+        img.onload = () => {
+          URL.revokeObjectURL(blobUrl); // Clean up blob URL
+          res(img);
+        };
+        img.onerror = rej;
+        img.src = blobUrl;
+      });
+    } catch (error) {
+      console.error('Failed to load image:', src, error);
+      throw error;
+    }
+  };
   
   console.log('Loading images for outfit:', {
     top_base: sel.top_base?.file || 'null',
@@ -495,13 +510,28 @@ async function loadImages(sel) {
 
 async function loadEDCImages(pairing) {
   if (!pairing || !pairing.items) return [];
-  const load = (src) => new Promise((res, rej) => {
-    const img = new Image();
-    img.crossOrigin = "anonymous"; // Allow canvas export with Firebase images
-    img.onload = () => res(img);
-    img.onerror = (e) => { console.warn('Failed to load EDC image:', src, e); res(null); };
-    img.src = src;
-  });
+  const load = async (src) => {
+    try {
+      // Fetch image as blob to bypass CORS restrictions
+      const response = await fetch(src);
+      if (!response.ok) throw new Error(`Failed to fetch: ${response.status}`);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      
+      return new Promise((res, rej) => {
+        const img = new Image();
+        img.onload = () => {
+          URL.revokeObjectURL(blobUrl); // Clean up blob URL
+          res(img);
+        };
+        img.onerror = rej;
+        img.src = blobUrl;
+      });
+    } catch (error) {
+      console.warn('Failed to load EDC image:', src, error);
+      return null;
+    }
+  };
   const images = [];
   for (const item of pairing.items) {
     const img = await load(item.file);
@@ -1062,15 +1092,30 @@ function hookup() {
 
 // Image cache for quick swapping
 const imageCache = new Map();
-function loadImageCached(src) {
-  return new Promise((resolve, reject) => {
-    if (imageCache.has(src)) return resolve(imageCache.get(src));
-    const img = new Image();
-    img.crossOrigin = "anonymous"; // Allow canvas export with Firebase images
-    img.onload = () => { imageCache.set(src, img); resolve(img); };
-    img.onerror = reject;
-    img.src = src;
-  });
+async function loadImageCached(src) {
+  if (imageCache.has(src)) return imageCache.get(src);
+  
+  try {
+    // Fetch image as blob to bypass CORS restrictions
+    const response = await fetch(src);
+    if (!response.ok) throw new Error(`Failed to fetch: ${response.status}`);
+    const blob = await response.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(blobUrl); // Clean up blob URL
+        imageCache.set(src, img);
+        resolve(img);
+      };
+      img.onerror = reject;
+      img.src = blobUrl;
+    });
+  } catch (error) {
+    console.error('Failed to load cached image:', src, error);
+    throw error;
+  }
 }
 
 async function cycleCategory(category, dir) {
