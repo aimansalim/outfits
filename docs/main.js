@@ -469,6 +469,7 @@ function layoutSquares(W, H, includeJacket) {
 async function loadImages(sel) {
   const load = (src) => new Promise((res, rej) => {
     const img = new Image();
+    img.crossOrigin = "anonymous"; // Allow canvas export with Firebase images
     img.onload = () => res(img);
     img.onerror = rej;
     img.src = src;
@@ -496,6 +497,7 @@ async function loadEDCImages(pairing) {
   if (!pairing || !pairing.items) return [];
   const load = (src) => new Promise((res, rej) => {
     const img = new Image();
+    img.crossOrigin = "anonymous"; // Allow canvas export with Firebase images
     img.onload = () => res(img);
     img.onerror = (e) => { console.warn('Failed to load EDC image:', src, e); res(null); };
     img.src = src;
@@ -1064,6 +1066,7 @@ function loadImageCached(src) {
   return new Promise((resolve, reject) => {
     if (imageCache.has(src)) return resolve(imageCache.get(src));
     const img = new Image();
+    img.crossOrigin = "anonymous"; // Allow canvas export with Firebase images
     img.onload = () => { imageCache.set(src, img); resolve(img); };
     img.onerror = reject;
     img.src = src;
