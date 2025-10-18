@@ -468,26 +468,15 @@ function layoutSquares(W, H, includeJacket) {
 
 async function loadImages(sel) {
   const load = async (src) => {
-    try {
-      // Fetch image as blob to bypass CORS restrictions
-      const response = await fetch(src);
-      if (!response.ok) throw new Error(`Failed to fetch: ${response.status}`);
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      
-      return new Promise((res, rej) => {
-        const img = new Image();
-        img.onload = () => {
-          URL.revokeObjectURL(blobUrl); // Clean up blob URL
-          res(img);
-        };
-        img.onerror = rej;
-        img.src = blobUrl;
-      });
-    } catch (error) {
-      console.error('Failed to load image:', src, error);
-      throw error;
-    }
+    return new Promise((res, rej) => {
+      const img = new Image();
+      img.onload = () => res(img);
+      img.onerror = () => {
+        console.error('Failed to load image:', src);
+        rej(new Error(`Failed to load: ${src}`));
+      };
+      img.src = src;
+    });
   };
   
   console.log('Loading images for outfit:', {
@@ -512,20 +501,14 @@ async function loadEDCImages(pairing) {
   if (!pairing || !pairing.items) return [];
   const load = async (src) => {
     try {
-      // Fetch image as blob to bypass CORS restrictions
-      const response = await fetch(src);
-      if (!response.ok) throw new Error(`Failed to fetch: ${response.status}`);
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      
       return new Promise((res, rej) => {
         const img = new Image();
-        img.onload = () => {
-          URL.revokeObjectURL(blobUrl); // Clean up blob URL
-          res(img);
+        img.onload = () => res(img);
+        img.onerror = () => {
+          console.warn('Failed to load EDC image:', src);
+          rej(new Error(`Failed to load: ${src}`));
         };
-        img.onerror = rej;
-        img.src = blobUrl;
+        img.src = src;
       });
     } catch (error) {
       console.warn('Failed to load EDC image:', src, error);
@@ -1095,27 +1078,18 @@ const imageCache = new Map();
 async function loadImageCached(src) {
   if (imageCache.has(src)) return imageCache.get(src);
   
-  try {
-    // Fetch image as blob to bypass CORS restrictions
-    const response = await fetch(src);
-    if (!response.ok) throw new Error(`Failed to fetch: ${response.status}`);
-    const blob = await response.blob();
-    const blobUrl = URL.createObjectURL(blob);
-    
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => {
-        URL.revokeObjectURL(blobUrl); // Clean up blob URL
-        imageCache.set(src, img);
-        resolve(img);
-      };
-      img.onerror = reject;
-      img.src = blobUrl;
-    });
-  } catch (error) {
-    console.error('Failed to load cached image:', src, error);
-    throw error;
-  }
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      imageCache.set(src, img);
+      resolve(img);
+    };
+    img.onerror = () => {
+      console.error('Failed to load cached image:', src);
+      reject(new Error(`Failed to load: ${src}`));
+    };
+    img.src = src;
+  });
 }
 
 async function cycleCategory(category, dir) {
