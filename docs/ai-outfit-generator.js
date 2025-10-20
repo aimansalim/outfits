@@ -176,7 +176,10 @@ Respond with a JSON object matching the schema.`;
       }
     } catch (error) {
       console.error('AI generation error:', error);
-      throw new Error(`Failed to generate outfit: ${error.message}`);
+      console.log('Falling back to local AI simulation...');
+      
+      // Fallback: Generate outfit locally based on prompt
+      return this.generateLocalOutfit(prompt, allItems);
     }
   }
 
@@ -198,6 +201,89 @@ Respond with a JSON object matching the schema.`;
     });
 
     return items;
+  }
+
+  generateLocalOutfit(prompt, items) {
+    console.log('Generating local outfit for:', prompt);
+    
+    // Simple local AI based on prompt keywords
+    const promptLower = prompt.toLowerCase();
+    
+    // Categorize items
+    const tops = items.filter(item => item.category === 'top_base' || item.category === 'top');
+    const overshirts = items.filter(item => item.category === 'top_overshirt' || (item.topLayer === 'overshirt'));
+    const jackets = items.filter(item => item.category === 'outerwear');
+    const bottoms = items.filter(item => item.category === 'bottom');
+    const shoes = items.filter(item => item.category === 'shoes');
+    
+    // Style-based selection
+    let selectedTop = null;
+    let selectedOvershirt = null;
+    let selectedJacket = null;
+    let selectedBottom = null;
+    let selectedShoes = null;
+    let style = 'casual';
+    let colors = [];
+    let reasoning = '';
+    
+    // Select based on prompt
+    if (promptLower.includes('streetwear') || promptLower.includes('street')) {
+      style = 'streetwear';
+      selectedTop = tops.find(t => t.name.toLowerCase().includes('wide') || t.styles?.includes('streetwear')) || tops[0];
+      selectedBottom = bottoms.find(b => b.name.toLowerCase().includes('nike') || b.styles?.includes('sporty')) || bottoms[0];
+      selectedShoes = shoes.find(s => s.name.toLowerCase().includes('samba') || s.styles?.includes('sporty')) || shoes[0];
+      reasoning = 'Streetwear look with oversized top and sporty elements';
+    } else if (promptLower.includes('old money') || promptLower.includes('luxury') || promptLower.includes('preppy')) {
+      style = 'luxury';
+      selectedTop = tops.find(t => t.name.toLowerCase().includes('moncler') || t.styles?.includes('luxury')) || tops[0];
+      selectedBottom = bottoms.find(b => b.name.toLowerCase().includes('linen') || b.styles?.includes('minimal')) || bottoms[0];
+      selectedShoes = shoes.find(s => s.name.toLowerCase().includes('chelsea') || s.styles?.includes('formal')) || shoes[0];
+      reasoning = 'Old money aesthetic with luxury brands and clean lines';
+    } else if (promptLower.includes('minimal') || promptLower.includes('clean')) {
+      style = 'minimal';
+      selectedTop = tops.find(t => t.styles?.includes('minimal') || t.colors?.includes('white') || t.colors?.includes('black')) || tops[0];
+      selectedBottom = bottoms.find(b => b.styles?.includes('minimal') || b.colors?.includes('black')) || bottoms[0];
+      selectedShoes = shoes.find(s => s.styles?.includes('minimal') || s.colors?.includes('black') || s.colors?.includes('white')) || shoes[0];
+      reasoning = 'Minimalist look with clean lines and neutral colors';
+    } else if (promptLower.includes('cozy') || promptLower.includes('comfortable')) {
+      style = 'casual';
+      selectedTop = tops.find(t => t.name.toLowerCase().includes('hoodie') || t.styles?.includes('casual')) || tops[0];
+      selectedBottom = bottoms.find(b => b.name.toLowerCase().includes('nike') || b.styles?.includes('casual')) || bottoms[0];
+      selectedShoes = shoes.find(s => s.styles?.includes('casual') || s.styles?.includes('sporty')) || shoes[0];
+      reasoning = 'Cozy and comfortable outfit for relaxed vibes';
+    } else {
+      // Default selection
+      selectedTop = tops[0];
+      selectedBottom = bottoms[0];
+      selectedShoes = shoes[0];
+      reasoning = `Stylish outfit based on "${prompt}"`;
+    }
+    
+    // Add overshirt if available and style allows
+    if (overshirts.length > 0 && (style === 'luxury' || style === 'casual')) {
+      selectedOvershirt = overshirts[0];
+    }
+    
+    // Add jacket if available and style allows
+    if (jackets.length > 0 && (style === 'streetwear' || style === 'luxury')) {
+      selectedJacket = jackets[0];
+    }
+    
+    // Extract colors
+    if (selectedTop) colors.push(...(selectedTop.colors || []));
+    if (selectedBottom) colors.push(...(selectedBottom.colors || []));
+    if (selectedShoes) colors.push(...(selectedShoes.colors || []));
+    
+    return {
+      reasoning,
+      style,
+      colors: [...new Set(colors)], // Remove duplicates
+      top_base: selectedTop?.id || null,
+      top_overshirt: selectedOvershirt?.id || null,
+      outerwear: selectedJacket?.id || null,
+      bottom: selectedBottom?.id || null,
+      shoes: selectedShoes?.id || null
+    };
   }
 
   async applyOutfitRecommendation(recommendation, manifest) {
