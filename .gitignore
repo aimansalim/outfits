@@ -1,5 +1,6 @@
-# API Keys
+# API Keys and Config
 docs/ai-config.js
+docs/config.js
 
 # Node modules
 node_modules/

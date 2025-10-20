@@ -1,8 +1,8 @@
 // AI Outfit Generator with Structured Output
 class AIOutfitGenerator {
   constructor() {
-    this.apiKey = window.OPENAI_API_KEY || 'YOUR_API_KEY_HERE';
-    this.model = 'gpt-4o-2024-08-06';
+    this.apiKey = window.CONFIG?.OPENAI_API_KEY || 'YOUR_API_KEY_HERE';
+    this.model = window.CONFIG?.OPENAI_MODEL || 'gpt-4o-2024-08-06';
   }
 
   async initialize() {
