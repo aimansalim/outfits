@@ -56,13 +56,24 @@ class AIOutfitGenerator {
   }
 
   async generateOutfit(prompt, manifest) {
-    // Use hardcoded items if manifest is empty or has no items
-    const items = (manifest?.items && manifest.items.length > 0) ? manifest.items : this.getHardcodedItems();
+    // Always use hardcoded items as base, merge with uploaded items if available
+    const hardcodedItems = this.getHardcodedItems();
+    const uploadedItems = manifest?.items || [];
     
-    console.log('Using items:', items.length, 'items');
-    console.log('First few items:', items.slice(0, 3));
+    // Merge hardcoded and uploaded items (uploaded items take priority)
+    const allItems = [...hardcodedItems];
     
-    if (!items || items.length === 0) {
+    // Add uploaded items that don't exist in hardcoded
+    uploadedItems.forEach(uploadedItem => {
+      if (!allItems.find(item => item.id === uploadedItem.id)) {
+        allItems.push(uploadedItem);
+      }
+    });
+    
+    console.log('Using items:', allItems.length, 'total items');
+    console.log('Hardcoded:', hardcodedItems.length, 'Uploaded:', uploadedItems.length);
+    
+    if (!allItems || allItems.length === 0) {
       throw new Error('No clothing items available');
     }
 
@@ -109,7 +120,7 @@ class AIOutfitGenerator {
     };
 
     // Prepare available items for AI
-    const availableItems = this.prepareItemsForAI({ items });
+    const availableItems = this.prepareItemsForAI({ items: allItems });
     
     const systemPrompt = `You are a fashion AI that creates perfect outfits from a user's wardrobe. 
     
@@ -190,12 +201,23 @@ Respond with a JSON object matching the schema.`;
   }
 
   async applyOutfitRecommendation(recommendation, manifest) {
-    // Use hardcoded items if manifest is empty
-    const items = manifest?.items || this.getHardcodedItems();
+    // Always use hardcoded items as base, merge with uploaded items if available
+    const hardcodedItems = this.getHardcodedItems();
+    const uploadedItems = manifest?.items || [];
     
-    // Find the actual items from manifest
+    // Merge hardcoded and uploaded items (uploaded items take priority)
+    const allItems = [...hardcodedItems];
+    
+    // Add uploaded items that don't exist in hardcoded
+    uploadedItems.forEach(uploadedItem => {
+      if (!allItems.find(item => item.id === uploadedItem.id)) {
+        allItems.push(uploadedItem);
+      }
+    });
+    
+    // Find the actual items from all items
     const findItem = (id) => {
-      return items.find(item => item.id === id);
+      return allItems.find(item => item.id === id);
     };
 
     const outfit = {
