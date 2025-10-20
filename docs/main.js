@@ -806,10 +806,20 @@ let currentSel = null;
 // AI Outfit Functions
 async function initializeAI() {
   try {
+    // Wait for CONFIG to be loaded
+    if (!window.CONFIG) {
+      console.error('CONFIG not loaded! Waiting...');
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    
     console.log('API Key from CONFIG:', window.CONFIG?.OPENAI_API_KEY ? 'PRESENT' : 'MISSING');
     console.log('Model from CONFIG:', window.CONFIG?.OPENAI_MODEL);
+    console.log('FULL CONFIG:', window.CONFIG);
     
+    // PASS THE API KEY TO THE CONSTRUCTOR!
     state.aiGenerator = new AIOutfitGenerator();
+    console.log('INIZIALIZZANDO AI CON LA KEY:', window.CONFIG?.OPENAI_API_KEY ? 'CHIAVE PRESENTE' : 'CHIAVE MANCANTE!!!');
+    
     await state.aiGenerator.initialize();
     console.log('AI Outfit Generator initialized');
   } catch (error) {
