@@ -806,6 +806,9 @@ let currentSel = null;
 // AI Outfit Functions
 async function initializeAI() {
   try {
+    console.log('API Key from CONFIG:', window.CONFIG?.OPENAI_API_KEY ? 'PRESENT' : 'MISSING');
+    console.log('Model from CONFIG:', window.CONFIG?.OPENAI_MODEL);
+    
     state.aiGenerator = new AIOutfitGenerator();
     await state.aiGenerator.initialize();
     console.log('AI Outfit Generator initialized');
