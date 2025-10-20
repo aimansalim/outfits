@@ -858,14 +858,13 @@ async function generateAIOutfit() {
   try {
     console.log('Generating AI outfit for:', prompt.value);
     console.log('Available items in manifest:', state.manifest);
-    const manifestCount = Array.isArray(state.manifest) ? state.manifest.length : (state.manifest?.items?.length || 0);
-    console.log('Manifest items count:', manifestCount);
+    console.log('Manifest items count:', Array.isArray(state.manifest) ? state.manifest.length : (state.manifest?.items?.length || 0));
     
-    const recommendation = await state.aiGenerator.generateOutfit(prompt.value, state.manifest);
+    const recommendation = await state.aiGenerator.generateOutfit(prompt.value, { items: state.manifest });
     console.log('AI recommendation:', recommendation);
     
     // Apply the recommendation
-    const outfit = await state.aiGenerator.applyOutfitRecommendation(recommendation, state.manifest);
+    const outfit = await state.aiGenerator.applyOutfitRecommendation(recommendation, { items: state.manifest });
     
     // Update current selection
     currentSel = outfit;
