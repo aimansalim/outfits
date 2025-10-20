@@ -860,6 +860,7 @@ async function generateAIOutfit() {
     console.log('Available items in manifest:', state.manifest);
     console.log('Manifest items count:', Array.isArray(state.manifest) ? state.manifest.length : (state.manifest?.items?.length || 0));
     console.log('STO INVIANDO QUESTO ALLA AI:', state.manifest);
+    console.log('PRIMO ITEM STRUTTURA:', state.manifest[0]);
     
     const recommendation = await state.aiGenerator.generateOutfit(prompt.value, state.manifest);
     console.log('AI recommendation:', recommendation);
