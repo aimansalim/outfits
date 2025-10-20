@@ -2,7 +2,7 @@
 class AIOutfitGenerator {
   constructor() {
     this.apiKey = window.CONFIG?.OPENAI_API_KEY || 'YOUR_API_KEY_HERE';
-    this.model = window.CONFIG?.OPENAI_MODEL || 'gpt-4o-2024-08-06';
+    this.model = window.CONFIG?.OPENAI_MODEL || 'gpt-5-nano-2025-08-07';
   }
 
   async initialize() {

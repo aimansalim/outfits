@@ -15,7 +15,7 @@
 ```javascript
 window.CONFIG = {
   OPENAI_API_KEY: 'sk-proj-your-actual-api-key-here',
-  OPENAI_MODEL: 'gpt-4o-2024-08-06'
+  OPENAI_MODEL: 'gpt-5-nano-2025-08-07'
 };
 ```
 
