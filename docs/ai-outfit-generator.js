@@ -57,7 +57,8 @@ class AIOutfitGenerator {
 
   async generateOutfit(prompt, manifest) {
     // Use ONLY uploaded items from wardrobe
-    const uploadedItems = manifest?.items || [];
+    // manifest can be an array directly or an object with items property
+    const uploadedItems = Array.isArray(manifest) ? manifest : (manifest?.items || []);
     
     console.log('Using ONLY uploaded items:', uploadedItems.length, 'items');
     console.log('Uploaded items:', uploadedItems.slice(0, 3).map(item => ({ id: item.id, name: item.name, category: item.category })));
@@ -285,7 +286,8 @@ Respond with a JSON object matching the schema.`;
 
   async applyOutfitRecommendation(recommendation, manifest) {
     // Use ONLY uploaded items from wardrobe
-    const uploadedItems = manifest?.items || [];
+    // manifest can be an array directly or an object with items property
+    const uploadedItems = Array.isArray(manifest) ? manifest : (manifest?.items || []);
     
     // Find the actual items from uploaded items
     const findItem = (id) => {
