@@ -13,8 +13,53 @@ class AIOutfitGenerator {
     console.log('AI Outfit Generator initialized');
   }
 
+  getHardcodedItems() {
+    return [
+      // TOPS
+      { id: 'white-polo-tee', name: 'White Polo Tee', category: 'top_base', colors: ['white'], styles: ['casual', 'minimal'], file: 'assets/tees/white-polo-tee.png' },
+      { id: 'green-polo-tee', name: 'Green Polo Tee', category: 'top_base', colors: ['green'], styles: ['casual', 'sporty'], file: 'assets/tees/green-polo-tee.png' },
+      { id: 'black-polo-tee', name: 'Black Polo Tee', category: 'top_base', colors: ['black'], styles: ['casual', 'minimal'], file: 'assets/tees/black-polo-tee-red-horse.png' },
+      { id: 'white-moncler-tee', name: 'White Moncler Tee', category: 'top_base', colors: ['white'], styles: ['luxury', 'minimal'], file: 'assets/tees/white-moncler-tee.png' },
+      { id: 'white-wide-tee', name: 'White Wide Tee', category: 'top_base', colors: ['white'], styles: ['streetwear', 'oversized'], file: 'assets/tees/white-wide-tee.png' },
+      
+      // OVERSHIRTS
+      { id: 'beige-polo-crewneck', name: 'Beige Polo Crewneck', category: 'top_overshirt', colors: ['beige'], styles: ['casual', 'preppy'], file: 'assets/midlayer/beige-polo-crewneck.png' },
+      { id: 'black-half-button', name: 'Black Half Button', category: 'top_overshirt', colors: ['black'], styles: ['minimal', 'casual'], file: 'assets/midlayer/black-half-button-long-sleeve.png' },
+      { id: 'green-linen-button', name: 'Green Linen Button', category: 'top_overshirt', colors: ['green'], styles: ['casual', 'summer'], file: 'assets/midlayer/green-linen-button-up.png' },
+      { id: 'military-green-armani', name: 'Military Green Armani', category: 'top_overshirt', colors: ['green'], styles: ['luxury', 'military'], file: 'assets/midlayer/military-green-armani-button-up.png' },
+      
+      // JACKETS
+      { id: 'black-montone', name: 'Black Montone', category: 'outerwear', colors: ['black'], styles: ['luxury', 'minimal'], file: 'assets/jackets/black-montone.png' },
+      { id: 'black-parka', name: 'Black Parka', category: 'outerwear', colors: ['black'], styles: ['streetwear', 'winter'], file: 'assets/jackets/black-parka-waterproof.png' },
+      { id: 'technical-waterproof', name: 'Technical Waterproof', category: 'outerwear', colors: ['black'], styles: ['technical', 'outdoor'], file: 'assets/technical-waterproof-black-parka.png' },
+      
+      // BOTTOMS
+      { id: 'black-cotton-pants', name: 'Black Cotton Pants', category: 'bottom', colors: ['black'], styles: ['minimal', 'casual'], file: 'assets/pants/black-cotton-pants.png' },
+      { id: 'black-linen-pants', name: 'Black Linen Pants', category: 'bottom', colors: ['black'], styles: ['minimal', 'summer'], file: 'assets/pants/black-linen-pants.png' },
+      { id: 'black-nike-soft', name: 'Black Nike Soft', category: 'bottom', colors: ['black'], styles: ['sporty', 'casual'], file: 'assets/pants/black-nike-soft-pants.png' },
+      { id: 'green-linen-pants', name: 'Green Linen Pants', category: 'bottom', colors: ['green'], styles: ['casual', 'summer'], file: 'assets/pants/green-linen-pants.png' },
+      { id: 'grey-linen-pants', name: 'Grey Linen Pants', category: 'bottom', colors: ['grey'], styles: ['minimal', 'summer'], file: 'assets/pants/grey-linen-pants.png' },
+      { id: 'navy-linen-pants', name: 'Navy Linen Pants', category: 'bottom', colors: ['navy'], styles: ['minimal', 'summer'], file: 'assets/pants/navy-linen-pants.png' },
+      
+      // SHOES
+      { id: 'adidas-samba-white-bordeaux', name: 'Adidas Samba White Bordeaux', category: 'shoes', colors: ['white', 'bordeaux'], styles: ['sporty', 'retro'], file: 'assets/shoes/adidas-samba-white-bordeaux.png' },
+      { id: 'adidas-samba-white-green', name: 'Adidas Samba White Green', category: 'shoes', colors: ['white', 'green'], styles: ['sporty', 'retro'], file: 'assets/shoes/adidas-samba-white-green.png' },
+      { id: 'black-chelsea-boots', name: 'Black Chelsea Boots', category: 'shoes', colors: ['black'], styles: ['minimal', 'formal'], file: 'assets/shoes/black-chelsea-boots.png' },
+      { id: 'brown-chelsea-boots', name: 'Brown Chelsea Boots', category: 'shoes', colors: ['brown'], styles: ['minimal', 'casual'], file: 'assets/shoes/brown-chelsea-boots.png' },
+      { id: 'golden-goose-bianche', name: 'Golden Goose Bianche', category: 'shoes', colors: ['white'], styles: ['luxury', 'streetwear'], file: 'assets/shoes/golden-goose-bianche-verdi.png' },
+      { id: 'golden-goose-nere', name: 'Golden Goose Nere', category: 'shoes', colors: ['black'], styles: ['luxury', 'streetwear'], file: 'assets/shoes/golden-goose-nere.png' },
+      { id: 'mocassino-beige', name: 'Mocassino Beige', category: 'shoes', colors: ['beige'], styles: ['formal', 'minimal'], file: 'assets/shoes/mocassino-beige.png' },
+      { id: 'new-balance-military', name: 'New Balance Military', category: 'shoes', colors: ['green'], styles: ['sporty', 'military'], file: 'assets/shoes/new-balance-large-sole-military-green.png' },
+      { id: 'new-balance-white', name: 'New Balance White', category: 'shoes', colors: ['white'], styles: ['sporty', 'minimal'], file: 'assets/shoes/new-balance-white.png' },
+      { id: 'salomon-xt-4', name: 'Salomon XT-4', category: 'shoes', colors: ['black'], styles: ['technical', 'outdoor'], file: 'assets/shoes/salomon-xt-4-og.png' }
+    ];
+  }
+
   async generateOutfit(prompt, manifest) {
-    if (!manifest || !manifest.items) {
+    // Use hardcoded items if manifest is empty
+    const items = manifest?.items || this.getHardcodedItems();
+    
+    if (!items || items.length === 0) {
       throw new Error('No clothing items available');
     }
 
@@ -61,7 +106,7 @@ class AIOutfitGenerator {
     };
 
     // Prepare available items for AI
-    const availableItems = this.prepareItemsForAI(manifest);
+    const availableItems = this.prepareItemsForAI({ items });
     
     const systemPrompt = `You are a fashion AI that creates perfect outfits from a user's wardrobe. 
     
@@ -142,9 +187,12 @@ Respond with a JSON object matching the schema.`;
   }
 
   async applyOutfitRecommendation(recommendation, manifest) {
+    // Use hardcoded items if manifest is empty
+    const items = manifest?.items || this.getHardcodedItems();
+    
     // Find the actual items from manifest
     const findItem = (id) => {
-      return manifest.items.find(item => item.id === id);
+      return items.find(item => item.id === id);
     };
 
     const outfit = {
