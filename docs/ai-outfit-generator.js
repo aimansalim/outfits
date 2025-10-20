@@ -56,25 +56,14 @@ class AIOutfitGenerator {
   }
 
   async generateOutfit(prompt, manifest) {
-    // Always use hardcoded items as base, merge with uploaded items if available
-    const hardcodedItems = this.getHardcodedItems();
+    // Use ONLY uploaded items from wardrobe
     const uploadedItems = manifest?.items || [];
     
-    // Merge hardcoded and uploaded items (uploaded items take priority)
-    const allItems = [...hardcodedItems];
+    console.log('Using ONLY uploaded items:', uploadedItems.length, 'items');
+    console.log('Uploaded items:', uploadedItems.slice(0, 3).map(item => ({ id: item.id, name: item.name, category: item.category })));
     
-    // Add uploaded items that don't exist in hardcoded
-    uploadedItems.forEach(uploadedItem => {
-      if (!allItems.find(item => item.id === uploadedItem.id)) {
-        allItems.push(uploadedItem);
-      }
-    });
-    
-    console.log('Using items:', allItems.length, 'total items');
-    console.log('Hardcoded:', hardcodedItems.length, 'Uploaded:', uploadedItems.length);
-    
-    if (!allItems || allItems.length === 0) {
-      throw new Error('No clothing items available');
+    if (!uploadedItems || uploadedItems.length === 0) {
+      throw new Error('No clothing items available. Please upload some clothes first.');
     }
 
     // Create structured schema for outfit recommendation
@@ -120,7 +109,7 @@ class AIOutfitGenerator {
     };
 
     // Prepare available items for AI
-    const availableItems = this.prepareItemsForAI({ items: allItems });
+    const availableItems = this.prepareItemsForAI({ items: uploadedItems });
     
     const systemPrompt = `You are a fashion AI that creates perfect outfits from a user's wardrobe. 
     
@@ -179,7 +168,7 @@ Respond with a JSON object matching the schema.`;
       console.log('Falling back to local AI simulation...');
       
       // Fallback: Generate outfit locally based on prompt
-      return this.generateLocalOutfit(prompt, allItems);
+      return this.generateLocalOutfit(prompt, uploadedItems);
     }
   }
 
@@ -209,12 +198,20 @@ Respond with a JSON object matching the schema.`;
     // Simple local AI based on prompt keywords
     const promptLower = prompt.toLowerCase();
     
-    // Categorize items
-    const tops = items.filter(item => item.category === 'top_base' || item.category === 'top');
-    const overshirts = items.filter(item => item.category === 'top_overshirt' || (item.topLayer === 'overshirt'));
+    // Categorize items based on actual uploaded data structure
+    const tops = items.filter(item => 
+      (item.category === 'top' && item.topLayer === 'base') || 
+      item.category === 'top_base'
+    );
+    const overshirts = items.filter(item => 
+      (item.category === 'top' && item.topLayer === 'overshirt') || 
+      item.category === 'top_overshirt'
+    );
     const jackets = items.filter(item => item.category === 'outerwear');
     const bottoms = items.filter(item => item.category === 'bottom');
     const shoes = items.filter(item => item.category === 'shoes');
+    
+    console.log('Categorized items:', { tops: tops.length, overshirts: overshirts.length, jackets: jackets.length, bottoms: bottoms.length, shoes: shoes.length });
     
     // Style-based selection
     let selectedTop = null;
@@ -287,23 +284,12 @@ Respond with a JSON object matching the schema.`;
   }
 
   async applyOutfitRecommendation(recommendation, manifest) {
-    // Always use hardcoded items as base, merge with uploaded items if available
-    const hardcodedItems = this.getHardcodedItems();
+    // Use ONLY uploaded items from wardrobe
     const uploadedItems = manifest?.items || [];
     
-    // Merge hardcoded and uploaded items (uploaded items take priority)
-    const allItems = [...hardcodedItems];
-    
-    // Add uploaded items that don't exist in hardcoded
-    uploadedItems.forEach(uploadedItem => {
-      if (!allItems.find(item => item.id === uploadedItem.id)) {
-        allItems.push(uploadedItem);
-      }
-    });
-    
-    // Find the actual items from all items
+    // Find the actual items from uploaded items
     const findItem = (id) => {
-      return allItems.find(item => item.id === id);
+      return uploadedItems.find(item => item.id === id);
     };
 
     const outfit = {
