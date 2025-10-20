@@ -853,6 +853,13 @@ async function generateAIOutfit() {
   
   try {
     console.log('Generating AI outfit for:', prompt.value);
+    console.log('Available items in manifest:', state.manifest);
+    console.log('Manifest items count:', state.manifest?.items?.length || 0);
+    
+    if (!state.manifest || !state.manifest.items || state.manifest.items.length === 0) {
+      throw new Error('No clothing items available. Please upload some clothes first.');
+    }
+    
     const recommendation = await state.aiGenerator.generateOutfit(prompt.value, state.manifest);
     console.log('AI recommendation:', recommendation);
     
