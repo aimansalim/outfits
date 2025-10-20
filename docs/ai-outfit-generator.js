@@ -314,6 +314,16 @@ Respond with a JSON object matching the schema.`;
       shoes: outfit.shoes?.name || 'NOT FOUND'
     });
 
+    // Create images object for the outfit (same structure as regular outfit generation)
+    outfit.images = {};
+    if (outfit.top_base) outfit.images.top_base = outfit.top_base.file;
+    if (outfit.top_overshirt) outfit.images.top_overshirt = outfit.top_overshirt.file;
+    if (outfit.outerwear) outfit.images.outerwear = outfit.outerwear.file;
+    if (outfit.bottom) outfit.images.bottom = outfit.bottom.file;
+    if (outfit.shoes) outfit.images.shoes = outfit.shoes.file;
+
+    console.log('AI outfit images:', outfit.images);
+
     return outfit;
   }
 }

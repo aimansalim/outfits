@@ -872,8 +872,11 @@ async function generateAIOutfit() {
     // Update current selection
     currentSel = outfit;
     
+    // Load images for the AI outfit
+    await loadImages(outfit);
+    
     // Draw the new outfit
-    draw(outfit, document.getElementById('c'));
+    draw();
     
     // Update state
     state.lastSelected = {
