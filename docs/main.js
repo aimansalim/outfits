@@ -726,6 +726,10 @@ async function regenerate(kind) {
   
   let sel;
   
+  // Initialize variables
+  let style = state.currentStyle || 'casual';
+  let pools = state.currentPools || {};
+  
   // If only toggling EDC or Jacket, keep the existing outfit
   if ((kind === 'edc' || kind === 'jacket') && currentSel) {
     console.log(`Keeping existing outfit, only toggling ${kind}`);
@@ -760,8 +764,8 @@ async function regenerate(kind) {
     state.seed = (state.seed + (kind === 'remix' ? 1 : 17)) >>> 0;
     const rng = mulberry32(state.seed);
     const poolsAll = categorize();
-    const style = chooseTargetStyle(poolsAll);
-    const pools = filterByStyle(poolsAll, style);
+    style = chooseTargetStyle(poolsAll);
+    pools = filterByStyle(poolsAll, style);
     console.log('Pools:', { tops: pools.top_base_tee?.length, overshirts: pools.top_overshirt?.length, pants: pools.bottom?.length, shoes: pools.shoes?.length });
     sel = generateOutfit(pools, rng);
     console.log('Selected outfit:', sel);
