@@ -10,6 +10,7 @@ const state = {
   currentPools: null,
   edcPairings: [],
   currentEDC: null,
+  aiGenerator: null,
 };
 
 // Deterministic PRNG (Mulberry32) seeded per action
@@ -798,12 +799,109 @@ async function regenerate(kind) {
 
 let currentSel = null;
 
+// AI Outfit Functions
+async function initializeAI() {
+  try {
+    state.aiGenerator = new AIOutfitGenerator();
+    await state.aiGenerator.initialize();
+    console.log('AI Outfit Generator initialized');
+  } catch (error) {
+    console.error('Failed to initialize AI:', error);
+    // Show error to user
+    const status = document.getElementById('ai-status');
+    if (status) {
+      status.textContent = `AI Error: ${error.message}`;
+      status.classList.remove('hidden');
+    }
+  }
+}
+
+async function showAIModal() {
+  const modal = document.getElementById('ai-modal');
+  const prompt = document.getElementById('ai-prompt');
+  const generateBtn = document.getElementById('ai-generate');
+  const status = document.getElementById('ai-status');
+  
+  if (!state.aiGenerator) {
+    await initializeAI();
+  }
+  
+  modal.classList.remove('hidden');
+  prompt.value = '';
+  generateBtn.disabled = true;
+  status.classList.add('hidden');
+  
+  // Focus on input
+  setTimeout(() => prompt.focus(), 100);
+}
+
+function hideAIModal() {
+  const modal = document.getElementById('ai-modal');
+  modal.classList.add('hidden');
+}
+
+async function generateAIOutfit() {
+  const prompt = document.getElementById('ai-prompt');
+  const generateBtn = document.getElementById('ai-generate');
+  const status = document.getElementById('ai-status');
+  
+  if (!prompt.value.trim()) return;
+  
+  generateBtn.disabled = true;
+  status.textContent = 'Generating outfit...';
+  status.classList.remove('hidden');
+  
+  try {
+    console.log('Generating AI outfit for:', prompt.value);
+    const recommendation = await state.aiGenerator.generateOutfit(prompt.value, state.manifest);
+    console.log('AI recommendation:', recommendation);
+    
+    // Apply the recommendation
+    const outfit = await state.aiGenerator.applyOutfitRecommendation(recommendation, state.manifest);
+    
+    // Update current selection
+    currentSel = outfit;
+    
+    // Draw the new outfit
+    draw(outfit, document.getElementById('c'));
+    
+    // Update state
+    state.lastSelected = {
+      top_base: outfit.top_base,
+      top_overshirt: outfit.top_overshirt,
+      outerwear: outfit.outerwear,
+      bottom: outfit.bottom,
+      shoes: outfit.shoes
+    };
+    
+    // Persist selection
+    try {
+      localStorage.setItem('lastSelected', JSON.stringify(state.lastSelected));
+    } catch (_) {}
+    
+    // Hide modal
+    hideAIModal();
+    
+    // Show success message briefly
+    status.textContent = `Generated: ${recommendation.reasoning}`;
+    setTimeout(() => {
+      status.classList.add('hidden');
+    }, 3000);
+    
+  } catch (error) {
+    console.error('AI generation failed:', error);
+    status.textContent = `Error: ${error.message}`;
+    generateBtn.disabled = false;
+  }
+}
+
 function hookup() {
   const canvas = document.getElementById('c');
   const jacket = document.getElementById('jacket');
   const edc = document.getElementById('edc');
   const remix = document.getElementById('remix');
   const save = document.getElementById('save');
+  const aiOutfit = document.getElementById('ai-outfit');
   
   // Menu toggles
   const menuToggle = document.getElementById('menu-toggle');
@@ -997,6 +1095,7 @@ function hookup() {
   edc.addEventListener('click', toggleEDC);
   remix.addEventListener('click', doRemix);
   save.addEventListener('click', doSave);
+  aiOutfit.addEventListener('click', showAIModal);
   
   // Menu toggles
   menuToggle.addEventListener('click', (e) => {
@@ -1013,6 +1112,38 @@ function hookup() {
   
   menuLogout.addEventListener('click', () => {
     window.logout();
+  });
+  
+  // AI Modal event listeners
+  const aiModal = document.getElementById('ai-modal');
+  const aiModalClose = document.getElementById('ai-modal-close');
+  const aiPrompt = document.getElementById('ai-prompt');
+  const aiGenerate = document.getElementById('ai-generate');
+  const aiExamples = document.querySelectorAll('.ai-example');
+  
+  aiModalClose.addEventListener('click', hideAIModal);
+  aiModal.addEventListener('click', (e) => {
+    if (e.target === aiModal) hideAIModal();
+  });
+  
+  aiPrompt.addEventListener('input', () => {
+    aiGenerate.disabled = !aiPrompt.value.trim();
+  });
+  
+  aiPrompt.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' && !aiGenerate.disabled) {
+      generateAIOutfit();
+    }
+  });
+  
+  aiGenerate.addEventListener('click', generateAIOutfit);
+  
+  aiExamples.forEach(example => {
+    example.addEventListener('click', () => {
+      aiPrompt.value = example.dataset.prompt;
+      aiGenerate.disabled = false;
+      aiPrompt.focus();
+    });
   });
   
   // Close dropdowns when clicking outside

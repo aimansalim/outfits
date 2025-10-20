@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Outfit Test</title>
+    <style>
+        body {
+            font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+            padding: 20px;
+            background: #fff;
+            color: #000;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+        }
+        button {
+            background: #000;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font: inherit;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #333; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            font: inherit;
+            margin: 5px;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f8f8;
+            border: 1px solid #ddd;
+            white-space: pre-wrap;
+        }
+        .error {
+            background: #ffe6e6;
+            border-color: #ff9999;
+        }
+    </style>
+</head>
+<body>
+    <h1>AI Outfit Generator Test</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: Initialize AI Generator</h2>
+        <button onclick="testInitialize()">Initialize AI</button>
+        <div id="init-result" class="result hidden"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 2: Generate Outfit (Mock Data)</h2>
+        <input type="text" id="test-prompt" placeholder="e.g., cozy fit" value="cozy fit">
+        <button onclick="testGenerate()">Generate Outfit</button>
+        <div id="generate-result" class="result hidden"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 3: JSON Schema Validation</h2>
+        <button onclick="testSchema()">Test Schema</button>
+        <div id="schema-result" class="result hidden"></div>
+    </div>
+
+    <script src="docs/ai-outfit.js"></script>
+    <script>
+        let aiGenerator = null;
+        
+        // Mock data for testing
+        const mockItems = [
+            {
+                id: "1",
+                name: "Black Polo Tee",
+                category: "top",
+                topLayer: "base",
+                colorHints: ["black"],
+                styleHints: ["casual"],
+                file: "https://via.placeholder.com/300x300/000000/FFFFFF?text=Black+Polo"
+            },
+            {
+                id: "2", 
+                name: "Navy Crewneck Sweater",
+                category: "top",
+                topLayer: "overshirt",
+                colorHints: ["navy"],
+                styleHints: ["casual"],
+                file: "https://via.placeholder.com/300x300/000080/FFFFFF?text=Navy+Crewneck"
+            },
+            {
+                id: "3",
+                name: "Black Chinos",
+                category: "bottom",
+                colorHints: ["black"],
+                styleHints: ["casual"],
+                file: "https://via.placeholder.com/300x300/000000/FFFFFF?text=Black+Chinos"
+            },
+            {
+                id: "4",
+                name: "White Sneakers",
+                category: "shoes",
+                colorHints: ["white"],
+                styleHints: ["casual", "sport"],
+                file: "https://via.placeholder.com/300x300/FFFFFF/000000?text=White+Sneakers"
+            }
+        ];
+        
+        async function testInitialize() {
+            const result = document.getElementById('init-result');
+            result.classList.remove('hidden', 'error');
+            
+            try {
+                aiGenerator = new AIOutfitGenerator();
+                await aiGenerator.initialize();
+                result.textContent = '✅ AI Generator initialized successfully!';
+            } catch (error) {
+                result.textContent = `❌ Error: ${error.message}`;
+                result.classList.add('error');
+            }
+        }
+        
+        async function testGenerate() {
+            const result = document.getElementById('generate-result');
+            const prompt = document.getElementById('test-prompt').value;
+            
+            result.classList.remove('hidden', 'error');
+            result.textContent = 'Generating...';
+            
+            try {
+                if (!aiGenerator) {
+                    throw new Error('AI Generator not initialized. Run Test 1 first.');
+                }
+                
+                const recommendation = await aiGenerator.generateOutfit(prompt, mockItems);
+                result.textContent = `✅ Generated outfit recommendation:\n\n${JSON.stringify(recommendation, null, 2)}`;
+            } catch (error) {
+                result.textContent = `❌ Error: ${error.message}`;
+                result.classList.add('error');
+            }
+        }
+        
+        function testSchema() {
+            const result = document.getElementById('schema-result');
+            result.classList.remove('hidden', 'error');
+            
+            try {
+                if (!aiGenerator) {
+                    throw new Error('AI Generator not initialized. Run Test 1 first.');
+                }
+                
+                const schema = aiGenerator.getOutfitSchema();
+                result.textContent = `✅ JSON Schema is valid:\n\n${JSON.stringify(schema, null, 2)}`;
+            } catch (error) {
+                result.textContent = `❌ Error: ${error.message}`;
+                result.classList.add('error');
+            }
+        }
+    </script>
+</body>
+</html>
