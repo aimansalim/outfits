@@ -56,8 +56,11 @@ class AIOutfitGenerator {
   }
 
   async generateOutfit(prompt, manifest) {
-    // Use hardcoded items if manifest is empty
-    const items = manifest?.items || this.getHardcodedItems();
+    // Use hardcoded items if manifest is empty or has no items
+    const items = (manifest?.items && manifest.items.length > 0) ? manifest.items : this.getHardcodedItems();
+    
+    console.log('Using items:', items.length, 'items');
+    console.log('First few items:', items.slice(0, 3));
     
     if (!items || items.length === 0) {
       throw new Error('No clothing items available');
