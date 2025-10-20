@@ -867,6 +867,8 @@ async function generateAIOutfit() {
     // Apply the recommendation
     const outfit = await state.aiGenerator.applyOutfitRecommendation(recommendation, state.manifest);
     
+    console.log('AI generated outfit:', outfit);
+    
     // Update current selection
     currentSel = outfit;
     

@@ -306,12 +306,13 @@ Respond with a JSON object matching the schema.`;
       images: {}
     };
 
-    // Load images for the outfit
-    if (outfit.top_base) outfit.images.top_base = outfit.top_base.file;
-    if (outfit.top_overshirt) outfit.images.top_overshirt = outfit.top_overshirt.file;
-    if (outfit.outerwear) outfit.images.outerwear = outfit.outerwear.file;
-    if (outfit.bottom) outfit.images.bottom = outfit.bottom.file;
-    if (outfit.shoes) outfit.images.shoes = outfit.shoes.file;
+    console.log('AI outfit items found:', {
+      top_base: outfit.top_base?.name || 'NOT FOUND',
+      top_overshirt: outfit.top_overshirt?.name || 'NOT FOUND', 
+      outerwear: outfit.outerwear?.name || 'NOT FOUND',
+      bottom: outfit.bottom?.name || 'NOT FOUND',
+      shoes: outfit.shoes?.name || 'NOT FOUND'
+    });
 
     return outfit;
   }
