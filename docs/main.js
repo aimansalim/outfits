@@ -812,6 +812,7 @@ async function initializeAI() {
       await new Promise(resolve => setTimeout(resolve, 100));
     }
     
+    console.log('window.CONFIG exists:', !!window.CONFIG);
     console.log('API Key from CONFIG:', window.CONFIG?.OPENAI_API_KEY ? 'PRESENT' : 'MISSING');
     console.log('Model from CONFIG:', window.CONFIG?.OPENAI_MODEL);
     console.log('FULL CONFIG:', window.CONFIG);
