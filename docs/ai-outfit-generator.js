@@ -58,12 +58,11 @@ class AIOutfitGenerator {
   async generateOutfit(prompt, manifest) {
     // Use ONLY uploaded items from wardrobe
     // manifest can be an array directly or an object with items property
-    console.log('AI received manifest:', manifest);
-    console.log('Manifest type:', Array.isArray(manifest) ? 'array' : typeof manifest);
-    console.log('Manifest length:', Array.isArray(manifest) ? manifest.length : 'not array');
-    
     const uploadedItems = Array.isArray(manifest) ? manifest : (manifest?.items || []);
     
+    console.log('AI received manifest:', manifest);
+    console.log('AI manifest type:', Array.isArray(manifest) ? 'array' : 'object');
+    console.log('AI manifest.items:', manifest?.items);
     console.log('Using ONLY uploaded items:', uploadedItems.length, 'items');
     console.log('Uploaded items:', uploadedItems.slice(0, 3).map(item => ({ id: item.id, name: item.name, category: item.category })));
     
